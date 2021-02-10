@@ -1,9 +1,16 @@
 __pycache__/
 env/
 .env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+docs/_buld/
 *.sh
 *.log
 *.db
 *.db.old
 *.db.bu
+*.sqlite3
 keys.txt
