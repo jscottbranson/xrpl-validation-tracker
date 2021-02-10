@@ -1,4 +1,8 @@
+# Cache
 __pycache__/
+*.pyc
+
+# Virtual Environments
 env/
 .env/
 venv/
@@ -6,7 +10,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Sphinx
 docs/_buld/
+
+# Other Stuff
 *.sh
 *.log
 *.db
