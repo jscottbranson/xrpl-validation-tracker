@@ -7,7 +7,7 @@ import logging
 
 import settings_aggregator as settings
 
-async def prune_sent_validation_list(sent_message_tracking):
+async def prune_sent_list(sent_message_tracking):
     '''
     Chop the sent message tracking list in half, so it doesn't grow infinitely.
 
@@ -18,9 +18,9 @@ async def prune_sent_validation_list(sent_message_tracking):
     # To-do: add an assert that SENT_MESSAGES_MAX_LENGTH is an int
 
     half_list = settings.SENT_MESSAGES_MAX_LENGTH / 2
-    logging.info(f"sent_validation list >= {settings.SENT_MESSAGES_MAX_LENGTH} items. Deleting {half_list} items.")
+    logging.info(f"Sent message list >= {settings.SENT_MESSAGES_MAX_LENGTH} items. Deleting {half_list} items.")
     del sent_message_tracking[0:int(half_list)]
-    logging.info(f"sent_validation list pruned. Current length: {len(sent_message_tracking)}.")
+    logging.info(f"Sent message list pruned. Current length: {len(sent_message_tracking)}.")
     return sent_message_tracking
 
 async def process_data(queue_receive, queue_send):
@@ -60,6 +60,6 @@ async def process_data(queue_receive, queue_send):
             # Ignore unexpected response messages
             pass
 
-        # Clean the sent_validation list
+        # Cull the sent_message_tracking list
         if len(sent_message_tracking) >= settings.SENT_MESSAGES_MAX_LENGTH:
-            sent_message_tracking = await prune_sent_validation_list(sent_message_tracking)
+            sent_message_tracking = await prune_sent_list(sent_message_tracking)

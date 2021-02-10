@@ -73,9 +73,7 @@ def get_validator_key(key, column, table, connection):
                     {})
                     VALUES(?) '''.format(table, column)
 
-        data = (
-            key,
-        )
+        data = (key,)
 
         key_id = sql_write(sql, data, connection)
 
@@ -105,7 +103,6 @@ def validations(message, connection):
     :param connection: connection to the SQL database
     '''
     ledger_id = ledger_id_check(message, connection)
-    #ephemeral_key_id = validator_ephemeral_key(message, connection)
     ephemeral_key_id = get_validator_key(
         message['validation_public_key'],
         'ephemeral_key',
@@ -137,14 +134,13 @@ def validations(message, connection):
         )
 
         sql = ''' INSERT INTO validation_stream(
-                                          id,
-                                          ledger_hash,
-                                          ephemeral_key,
-                                          master_key,
-                                          signing_time,
-                                          partial_validation
-                                          )
-                                          VALUES(?,?,?,?,?,?)
-                                          '''
+                id,
+                ledger_hash,
+                ephemeral_key,
+                master_key,
+                signing_time,
+                partial_validation
+                )
+                VALUES(?,?,?,?,?,?)'''
 
         sql_write(sql, data, connection)
