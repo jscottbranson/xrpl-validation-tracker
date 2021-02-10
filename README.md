@@ -1,4 +1,4 @@
-# xrpl-agreement-tracker
+# XRPL Validation Tracker
 Three modules are provided:
 1. The `aggregator` combines multiple websocket subscription streams into a single outgoing websocket stream.
 2. `db_writer` stores XRP Ledger data in relational databases. Since this code is in testing, only sqlite3 is supported now. Better database support is needed for production.
@@ -10,6 +10,9 @@ The `aggregator` code is structured to provide multiple layers of redundancy. Fo
 
 ## Installing & Running the Software
 After installing dependencies, adjust the settings in `settings_aggregator.py` and/or `settings_db_writer.py`, then run `start_aggregator.py` and/or `start_db_writer.py`. Both modules can be run on the same system.
+
+All modules depend on the python `websockets` module.
+`db_writer` requires sqlite3
 
 ## To Do Items
 1. Transition to Postgres or another production database
