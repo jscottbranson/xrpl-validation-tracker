@@ -20,11 +20,10 @@ async def spawn_workers():
     queue = asyncio.Queue(maxsize=0)
     logging.info("Adding initial asyncio tasks to the loop.")
     for url in settings.URLS:
-        task_name = "WS_LISTEN: " + url['url']
         ws_servers.append(
             {
                 'task': asyncio.create_task(
-                    ws_listen.websocket_subscribe(url, queue), name=task_name
+                    ws_listen.websocket_subscribe(url, settings.WS_SUBSCRIPTION_COMMAND, queue)
                 ),
                 'url': url,
                 'retry_count': 0,
@@ -32,9 +31,9 @@ async def spawn_workers():
         )
 
     # subscribe to a websocket server
-    asyncio.create_task(ws_minder.mind_tasks(ws_servers, queue, settings), name="Minder")
+    asyncio.create_task(ws_minder.mind_tasks(ws_servers, settings.WS_SUBSCRIPTION_COMMAND, queue, settings))
     # write into the db
-    asyncio.create_task(process_data(queue), name="DB Writer")
+    asyncio.create_task(process_data(queue))
 
 def start_loop():
     '''

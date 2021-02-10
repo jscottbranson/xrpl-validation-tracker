@@ -5,8 +5,6 @@ import ssl
 
 import websockets
 
-SUBSCRIPTION_COMMAND = {"command": "subscribe", "streams": ["validations"]}
-
 async def create_ws_object(url):
     '''
     Check if SSL certificate verification is enabled, then create a ws accordingly.
@@ -24,7 +22,7 @@ async def create_ws_object(url):
         logging.error(f"Error determining SSL/TLS settings for URL: {url}")
         return
 
-async def websocket_subscribe(url, queue_receive):
+async def websocket_subscribe(url, subscription_command, queue_receive):
     '''
     Connect to a websocket address using TLS settings specified in 'url'.
     Keep the socket open, and add unique validation subscription response messages to
@@ -42,20 +40,14 @@ async def websocket_subscribe(url, queue_receive):
         try:
             async with websocket_connection as ws:
                 # Subscribe to the validation stream
-                await ws.send(json.dumps(SUBSCRIPTION_COMMAND))
+                await ws.send(json.dumps(subscription_command))
                 logging.info(f"Subscribed to: {url['url']}")
                 while True:
                     # Listen for response messages
                     data = await ws.recv()
                     try:
                         data = json.loads(data)
-                        # Discard validations without 'master_key', as they were sent from a node
-                        # that is running outdated software.
-                        if data['type'] == "validationReceived" and 'master_key' in data:
-                            await queue_receive.put(data)
-                    except KeyError as error:
-                        # Ignore messages that don't contain 'type' key.
-                        pass
+                        await queue_receive.put(data)
                     except (
                             json.JSONDecodeError,
                     ) as error:

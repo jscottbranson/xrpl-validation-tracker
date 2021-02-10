@@ -17,7 +17,13 @@ async def process_data(queue):
     # Listen for validations
     while True:
         validation = await queue.get()
-        db_validation_writer(validation, database)
+        try:
+            if validation['type'] == 'validationReceived' and 'master_key' in validation:
+                db_validation_writer(validation, database)
+        except KeyError as error:
+            # Ignore messages that don't contain 'type' key
+            pass
+
         queue_size = queue.qsize()
         if queue_size > queue_size_max:
             queue_size_max = queue_size

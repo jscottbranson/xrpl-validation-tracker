@@ -14,6 +14,8 @@ After installing dependencies, adjust the settings in `settings_aggregator.py` a
 All modules depend on the python `websockets` module.
 `db_writer` requires sqlite3
 
+This has been tested on Python 3.7 and 3.8
+
 ## To Do Items
 1. Transition to Postgres or another production database
 2. Improve database structure & index the database
