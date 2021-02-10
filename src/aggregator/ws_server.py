@@ -1,5 +1,5 @@
 '''
-Server to send unique validation stream messages.
+Listen for messages in the queue, then dispatch them to connected websocket clients.
 '''
 import asyncio
 import logging
@@ -37,19 +37,19 @@ class WsServer:
             self.clients.add(websocket)
             logging.info(f"A new user with IP: {websocket.remote_address[0]} connected to the WS server.")
             while True:
-                outgoing_validation_message = json.dumps(await self.queue_send.get())
+                outgoing_message = json.dumps(await self.queue_send.get())
                 # The following (if self.clients) if statement might not be necessary.
                 if self.clients:
                     for client in self.clients:
                         if client.open:
-                            await client.send(outgoing_validation_message)
+                            await client.send(outgoing_message)
         except (
                 AttributeError,
                 websockets.exceptions.ConnectionClosedError,
                 ConnectionResetError,
         ) as error:
             logging.warning(f"Error with outgoing websocket server: {error}.")
-            self.remove_client(websocket)
+            await self.remove_client(websocket)
         except (websockets.exceptions.ConnectionClosedOK) as error:
             logging.info(f"Websocket server connection closed: {error}")
             await self.remove_client(websocket)
