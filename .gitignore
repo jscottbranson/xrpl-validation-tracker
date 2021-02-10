@@ -1,0 +1,9 @@
+__pycache__/
+env/
+.env/
+*.sh
+*.log
+*.db
+*.db.old
+*.db.bu
+keys.txt
