@@ -4,6 +4,8 @@ select which modules to run based on user input, and pass the relevant settings 
 
 import argparse
 import logging
+from multiprocessing import Process
+from sys import exit as sys_exit
 
 PARSER = argparse.ArgumentParser(description="Select which module to run.")
 PARSER.add_argument("-a", "--aggregator", help="Run the aggregator.", action="store_true")
@@ -50,8 +52,16 @@ def run_aggregator():
     start_loop_ag(settings_ag)
 
 if __name__ == '__main__':
+    PROCESSES = []
     if ARGS.aggregator:
-        run_aggregator()
-    # The following is 'elif', since two modules can't be run at once yet
-    elif ARGS.db_writer:
-        run_db_writer()
+        PROCESSES.append(Process(target=run_aggregator,))
+    if ARGS.db_writer:
+        PROCESSES.append(Process(target=run_db_writer,))
+
+    try:
+        for process in PROCESSES:
+            process.start()
+        for process in PROCESSES:
+            process.join()
+    except KeyboardInterrupt:
+        sys_exit(0)

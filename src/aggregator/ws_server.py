@@ -22,7 +22,7 @@ class WsServer:
         :param client: Client that has disconnected
         '''
         logging.info(f"Client disconnected from WS server: {client}.")
-        self.clients.remove(self, client)
+        self.clients.remove(client)
 
     async def outgoing_server(self, websocket, path):
         '''

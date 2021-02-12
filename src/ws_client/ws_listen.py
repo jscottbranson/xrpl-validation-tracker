@@ -48,10 +48,10 @@ async def websocket_subscribe(url, subscription_command, queue_receive):
                     try:
                         data = json.loads(data)
                         await queue_receive.put(data)
-                    except (
-                            json.JSONDecodeError,
-                    ) as error:
+                    except (json.JSONDecodeError,) as error:
                         logging.warning(f"{url['url']}. Unable to decode JSON: {data}. Error: {error}")
+                        break
+                    except KeyboardInterrupt:
                         break
         except (
                 TimeoutError,

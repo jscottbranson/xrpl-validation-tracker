@@ -3,7 +3,6 @@ Add tasks to the asycnio loop.
 '''
 import asyncio
 import logging
-from sys import exit as sys_exit
 
 from ws_client import ws_listen
 from ws_client import ws_minder
@@ -51,14 +50,15 @@ def start_loop(settings):
 
     :param settings: Configuration file
     '''
-    try:
-        # Debug asyncio
-        if settings.ASYNCIO_DEBUG is True:
-            asyncio.get_event_loop().set_debug(True)
-            logging.info("asyncio debugging enabled.")
+    # Debug asyncio
+    if settings.ASYNCIO_DEBUG is True:
+        asyncio.get_event_loop().set_debug(True)
+        logging.info("asyncio debugging enabled.")
 
-        asyncio.get_event_loop().run_until_complete(spawn_workers(settings))
-        asyncio.get_event_loop().run_forever()
-    except KeyboardInterrupt:
-        logging.info("Keyboard interrupt detected. Exiting.")
-        sys_exit(0)
+    while True:
+        try:
+            asyncio.get_event_loop().run_until_complete(spawn_workers(settings))
+            asyncio.get_event_loop().run_forever()
+        except KeyboardInterrupt:
+            logging.critical("Keyboard interrupt detected. Exiting the aggregator.")
+            break

@@ -37,12 +37,15 @@ async def mind_tasks(ws_servers, queue_receive, settings):
     :param settings: File with necessary variables defined
     '''
     while True:
-        await asyncio.sleep(settings.WS_RETRY)
-        for server in ws_servers:
-            if server['task'].done() and server['retry_count'] <= settings.MAX_CONNECT_ATTEMPTS:
-                ws_servers = await resubscribe_client(
-                    ws_servers,
-                    settings.WS_SUBSCRIPTION_COMMAND,
-                    server,
-                    queue_receive
-                )
+        try:
+            await asyncio.sleep(settings.WS_RETRY)
+            for server in ws_servers:
+                if server['task'].done() and server['retry_count'] <= settings.MAX_CONNECT_ATTEMPTS:
+                    ws_servers = await resubscribe_client(
+                        ws_servers,
+                        settings.WS_SUBSCRIPTION_COMMAND,
+                        server,
+                        queue_receive
+                    )
+        except KeyboardInterrupt:
+            break

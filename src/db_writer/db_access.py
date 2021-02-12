@@ -21,9 +21,11 @@ async def process_db_data(queue, settings):
         try:
             if message['type'] == 'validationReceived' and 'master_key' in message:
                 db_validation_writer(message, database)
-        except KeyError as error:
+        except KeyError:
             # Ignore messages that don't contain 'type' key
             pass
+        except KeyboardInterrupt:
+            break
 
         queue_size = queue.qsize()
         if queue_size > queue_size_max:

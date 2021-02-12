@@ -3,7 +3,6 @@ Compile and run asyncio tasks.
 '''
 import asyncio
 import logging
-from sys import exit as sys_exit
 
 from ws_client import ws_listen
 from ws_client import ws_minder
@@ -52,15 +51,16 @@ def start_loop(settings):
 
     :param settings: Configuration file
     '''
-    try:
-        loop = asyncio.get_event_loop()
-        # Debug asyncio
-        if settings.ASYNCIO_DEBUG is True:
-            loop.set_debug(True)
-            logging.info("asyncio debugging enabled.")
+    loop = asyncio.get_event_loop()
+    # Debug asyncio
+    if settings.ASYNCIO_DEBUG is True:
+        loop.set_debug(True)
+        logging.info("asyncio debugging enabled.")
 
-        loop.run_until_complete(spawn_workers(settings))
-        loop.run_forever()
-    except KeyboardInterrupt:
-        logging.info("Keyboard interrupt detected. Exiting.")
-        sys_exit(0)
+    while True:
+        try:
+            loop.run_until_complete(spawn_workers(settings))
+            loop.run_forever()
+        except KeyboardInterrupt:
+            logging.critical("Keyboard interrupt detected. Exiting the db_writer.")
+            break
