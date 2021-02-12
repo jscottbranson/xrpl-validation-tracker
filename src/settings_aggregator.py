@@ -2,6 +2,7 @@
 Variables
 '''
 #### ------------------- General Settings ------------------- ####
+VERBOSE = False # True/False for console messages
 LOG_FILE = "../aggregator.log" # Log file location
 ASYNCIO_DEBUG = False # Debug the asyncio loop
 
