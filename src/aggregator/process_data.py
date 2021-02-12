@@ -48,14 +48,15 @@ async def process_data(queue_receive, queue_send):
             if message[settings.UNIQUE_MESSAGE_KEY] not in sent_message_tracking:
                 await queue_send.put(message)
                 sent_message_tracking.append(message[settings.UNIQUE_MESSAGE_KEY])
-                print(
-                    "Incoming queue length:",
-                    queue_size,
-                    "Outgoing queue length:",
-                    queue_send.qsize(),
-                    "Sent message duplicate tracking list length:",
-                    len(sent_message_tracking),
-                )
+                if settings.VERBOSE == True:
+                    print(
+                         "Incoming queue length:",
+                         queue_size,
+                         "Outgoing queue length:",
+                         queue_send.qsize(),
+                         "Sent message duplicate tracking list length:",
+                         len(sent_message_tracking),
+                     )
         except KeyError:
             # Ignore unexpected response messages
             pass
