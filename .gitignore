@@ -18,6 +18,7 @@ docs/_buld/
 *.sh
 *.log
 *.db
+*.db-journal
 *.db.old
 *.db.bu
 *.sqlite3
