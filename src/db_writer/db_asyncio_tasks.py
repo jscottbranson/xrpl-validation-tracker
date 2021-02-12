@@ -5,14 +5,15 @@ import asyncio
 import logging
 from sys import exit as sys_exit
 
-import settings_database as settings
 from ws_client import ws_listen
 from ws_client import ws_minder
 from .db_access import process_data
 
-async def spawn_workers():
+async def spawn_workers(settings):
     '''
     Add tasks to the asyncio loop.
+
+    :param settings: Configuration file
     '''
     ws_servers = []
 
@@ -31,13 +32,21 @@ async def spawn_workers():
         )
 
     # subscribe to a websocket server
-    asyncio.create_task(ws_minder.mind_tasks(ws_servers, settings.WS_SUBSCRIPTION_COMMAND, queue, settings))
+    asyncio.create_task(
+        ws_minder.mind_tasks(
+            ws_servers,
+            queue,
+            settings
+        )
+    )
     # write into the db
-    asyncio.create_task(process_data(queue))
+    asyncio.create_task(process_data(queue, settings))
 
-def start_loop():
+def start_loop(settings):
     '''
     Run the asyncio event loop.
+
+    :param settings: Configuration file
     '''
     try:
         loop = asyncio.get_event_loop()
@@ -46,7 +55,7 @@ def start_loop():
             loop.set_debug(True)
             logging.info("asyncio debugging enabled.")
 
-        loop.run_until_complete(spawn_workers())
+        loop.run_until_complete(spawn_workers(settings))
         loop.run_forever()
     except KeyboardInterrupt:
         logging.info("Keyboard interrupt detected. Exiting.")

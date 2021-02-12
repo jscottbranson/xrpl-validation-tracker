@@ -2,18 +2,19 @@ import asyncio
 import logging
 from sys import exit
 
-import settings_database as settings
 from .sqlite_connection import create_db_connection
 from .sqlite_writer import validations as db_validation_writer
 
-async def process_data(queue):
+async def process_data(queue, settings):
     '''
     Process data websocket connections place into the queue.
+
     :param asyncio.queues.Queue queue: Validation stream queue
+    :param settings: Configuration file
     '''
     queue_size_max = 0
     # Create an object for the database connection.
-    database = create_db_connection()
+    database = create_db_connection(settings.DATABASE_LOCATION)
     # Listen for validations
     while True:
         validation = await queue.get()

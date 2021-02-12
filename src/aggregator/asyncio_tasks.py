@@ -5,14 +5,17 @@ import asyncio
 import logging
 from sys import exit as sys_exit
 
-import settings_aggregator as settings
 from ws_client import ws_listen
 from ws_client import ws_minder
 from .process_data import process_data
 from .ws_server import WsServer
 
-async def spawn_workers():
-    '''Add tasks to the asyncio loop.'''
+async def spawn_workers(settings):
+    '''
+    Add tasks to the asyncio loop.
+
+    :param settings: Configuration file
+    '''
     ws_servers = []
 
     # Create queues for websocket messages
@@ -38,23 +41,24 @@ async def spawn_workers():
         WsServer().start_outgoing_server(queue_send)
     )
     asyncio.create_task(
-        ws_minder.mind_tasks(ws_servers, settings.WS_SUBSCRIPTION_COMMAND, queue_receive, settings)
+        ws_minder.mind_tasks(ws_servers, queue_receive, settings)
     )
     logging.info("Initial asyncio task list is running.")
 
-def start_loop():
-    '''Run the asyncio event loop.'''
+def start_loop(settings):
+    '''
+    Run the asyncio event loop.
+
+    :param settings: Configuration file
+    '''
     try:
         # Debug asyncio
         if settings.ASYNCIO_DEBUG is True:
             asyncio.get_event_loop().set_debug(True)
             logging.info("asyncio debugging enabled.")
 
-        asyncio.get_event_loop().run_until_complete(spawn_workers())
+        asyncio.get_event_loop().run_until_complete(spawn_workers(settings))
         asyncio.get_event_loop().run_forever()
     except KeyboardInterrupt:
         logging.info("Keyboard interrupt detected. Exiting.")
         sys_exit(0)
-
-if __name__ == "__main__":
-    start_loop()

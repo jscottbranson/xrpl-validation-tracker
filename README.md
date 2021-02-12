@@ -25,7 +25,7 @@ This has been tested on Python 3.7 and 3.8
 6. Change logging to % format
 7. If possible, call `aggregator`'s process_data in `db_writer` to prevent excessive DB queries
 8. Daemonize
-9. Combine startup scripts into a single script that accepts a flag specifying which module to start
+9. Add threading to the startup script, so a user can start multiple modules at once
 10. Fetch manifest, verify domain, and store domain in DB
 11. Retrieve and store UNL(s) & flag validator keys in the DB that belong to a specified UNL
 

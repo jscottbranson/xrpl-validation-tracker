@@ -3,7 +3,7 @@ Variables
 '''
 #### ------------------ General Settings #### ------------------
 LOG_FILE = "../database_writer.log"
-DATABASE = "../validation_database.db"
+DATABASE_LOCATION = "../validation_database.db"
 ASYNCIO_DEBUG = False
 
 #### ------------------ Websocket Client Settings #### ------------------

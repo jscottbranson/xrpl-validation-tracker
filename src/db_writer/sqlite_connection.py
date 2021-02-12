@@ -2,18 +2,17 @@
 This module interfaces with a SQL database by writing data extracted
 from websocket messages to the database.
 '''
-
+import logging
 import sqlite3
-from sqlite3 import Error
-import settings_database as settings
 
-def create_db_connection():
+def create_db_connection(db_location):
     '''
     Connect to the SQL database.
-    :param format: structure for the table that is being written to.
+
+    :param db_location: Location to store the database
     '''
     try:
-        connection = sqlite3.connect(settings.DATABASE)
+        connection = sqlite3.connect(db_location)
         if connection is not None:
             try:
                 connection.cursor().execute("""CREATE TABLE IF NOT EXISTS validation_stream (
@@ -44,8 +43,9 @@ def create_db_connection():
                                             )
 
                 return connection
-            except Error as message:
-                print("EXCEPTION: ", message)
+            except sqlite3.Error as message:
+                logging.critical(f"Error creating the database: {message}.")
+                return None
 
-    except Error as message:
-        print(message)
+    except sqlite3.Error as message:
+        logging.critical(f"Error creating the database: {message}.")
