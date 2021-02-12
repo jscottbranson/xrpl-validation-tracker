@@ -22,4 +22,4 @@ SERVER_IP = '127.0.0.1'
 SERVER_PORT = 8000
 
 UNIQUE_MESSAGE_KEY = 'signature' # Key in JSON WS response used to identify duplicate messages
-SENT_MESSAGES_MAX_LENGTH = 50000 # n outbound validations to store to avoid sending duplicates
+SENT_MESSAGES_MAX_LENGTH = 50000 # n outbound items to store to avoid sending duplicate outbound WS messages

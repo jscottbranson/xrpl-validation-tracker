@@ -9,7 +9,6 @@ PARSER = argparse.ArgumentParser(description="Select which module to run.")
 PARSER.add_argument("-a", "--aggregator", help="Run the aggregator.", action="store_true")
 PARSER.add_argument("-d", "--db_writer", help="Run the db_writer.", action="store_true")
 ARGS = PARSER.parse_args()
-logging.info(f"Running with arguments: {ARGS}.")
 
 def config_logging(settings):
     '''
@@ -24,6 +23,7 @@ def config_logging(settings):
         datefmt="%Y-%m-%d %H:%M:%S",
         format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
     )
+    logging.info(f"Running with arguments: {ARGS}.\nLogging configured successfully.")
 
 def run_db_writer():
     '''

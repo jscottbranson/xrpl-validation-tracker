@@ -7,8 +7,6 @@ import json
 import time
 import websockets
 
-import settings_aggregator as settings
-
 class WsServer:
     '''
     Websocket server.
@@ -56,7 +54,7 @@ class WsServer:
         finally:
             await self.remove_client(websocket)
 
-    async def start_outgoing_server(self, queue_send):
+    async def start_outgoing_server(self, queue_send, settings):
         '''
         Start listening for client connections.
 
@@ -65,12 +63,3 @@ class WsServer:
         self.queue_send = queue_send
         logging.info(f"Starting the websocket server on IP: {settings.SERVER_IP}:{settings.SERVER_PORT}.")
         await websockets.serve(self.outgoing_server, settings.SERVER_IP, settings.SERVER_PORT)
-
-if __name__ == "__main__":
-    START_SERVER = websockets.serve(
-        WsServer.outgoing_server,
-        settings.SERVER_IP,
-        settings.SERVER_PORT
-    )
-    asyncio.get_event_loop().run_until_complete(START_SERVER)
-    asyncio.get_event_loop().run_forever()

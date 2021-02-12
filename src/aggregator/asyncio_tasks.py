@@ -35,10 +35,10 @@ async def spawn_workers(settings):
             }
         )
     asyncio.create_task(
-        process_data(queue_receive, queue_send)
+        process_data(queue_receive, queue_send, settings)
     )
     asyncio.create_task(
-        WsServer().start_outgoing_server(queue_send)
+        WsServer().start_outgoing_server(queue_send, settings)
     )
     asyncio.create_task(
         ws_minder.mind_tasks(ws_servers, queue_receive, settings)

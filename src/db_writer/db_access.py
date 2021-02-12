@@ -5,7 +5,7 @@ from sys import exit
 from .sqlite_connection import create_db_connection
 from .sqlite_writer import validations as db_validation_writer
 
-async def process_data(queue, settings):
+async def process_db_data(queue, settings):
     '''
     Process data websocket connections place into the queue.
 
@@ -17,10 +17,10 @@ async def process_data(queue, settings):
     database = create_db_connection(settings.DATABASE_LOCATION)
     # Listen for validations
     while True:
-        validation = await queue.get()
+        message = await queue.get()
         try:
-            if validation['type'] == 'validationReceived' and 'master_key' in validation:
-                db_validation_writer(validation, database)
+            if message['type'] == 'validationReceived' and 'master_key' in message:
+                db_validation_writer(message, database)
         except KeyError as error:
             # Ignore messages that don't contain 'type' key
             pass
@@ -29,4 +29,3 @@ async def process_data(queue, settings):
         if queue_size > queue_size_max:
             queue_size_max = queue_size
             logging.info(f"New record high queue size: {queue_size_max}.")
-        print(f"Current queue length: {queue_size}. Max queue length: {queue_size_max}.")

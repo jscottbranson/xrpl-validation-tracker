@@ -19,7 +19,7 @@ def sql_write(sql, data, connection):
         connection.commit()
         return cursor.lastrowid
     except sqlite3.Error as exception:
-        print("Could not write data to database.", exception)
+        logging.critical(f"Could not write data to database: {exception}.")
 
 def ledger_id_check(message, connection):
     '''

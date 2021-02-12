@@ -7,7 +7,8 @@ from sys import exit as sys_exit
 
 from ws_client import ws_listen
 from ws_client import ws_minder
-from .db_access import process_data
+from .db_access import process_db_data
+from aggregator.process_data import process_data
 
 async def spawn_workers(settings):
     '''
@@ -19,6 +20,7 @@ async def spawn_workers(settings):
 
     # Create queues for websocket messages
     queue = asyncio.Queue(maxsize=0)
+    queue_db = asyncio.Queue(maxsize=0)
     logging.info("Adding initial asyncio tasks to the loop.")
     for url in settings.URLS:
         ws_servers.append(
@@ -39,8 +41,10 @@ async def spawn_workers(settings):
             settings
         )
     )
+    # check for duplicate messages
+    asyncio.create_task(process_data(queue, queue_db, settings))
     # write into the db
-    asyncio.create_task(process_data(queue, settings))
+    asyncio.create_task(process_db_data(queue_db, settings))
 
 def start_loop(settings):
     '''
