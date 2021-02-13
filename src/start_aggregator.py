@@ -22,4 +22,6 @@ def check_assertions():
 if __name__ == "__main__":
     config_logging()
     check_assertions()
+    print("Aggregator started")
+    print("Server listening on ws://" + settings.SERVER_IP + ":" + str(settings.SERVER_PORT))
     start_loop()
