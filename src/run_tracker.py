@@ -10,6 +10,7 @@ from sys import exit as sys_exit
 PARSER = argparse.ArgumentParser(description="Select which module to run.")
 PARSER.add_argument("-a", "--aggregator", help="Run the aggregator.", action="store_true")
 PARSER.add_argument("-d", "--db_writer", help="Run the db_writer.", action="store_true")
+PARSER.add_argument("-s", "--supplemental", help="Run supplemental_data.", action="store_true")
 ARGS = PARSER.parse_args()
 
 def config_logging(settings):
@@ -25,7 +26,19 @@ def config_logging(settings):
         datefmt="%Y-%m-%d %H:%M:%S",
         format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
     )
-    logging.info(f"Running with arguments: {ARGS}.\nLogging configured successfully.")
+    #logging.info(f"Running with arguments: {ARGS}.\nLogging configured successfully.")
+
+def run_supplemental():
+    '''
+    Run the supplemental_data module.
+    '''
+    import settings_supplemental
+    from assertions.assert_supplemental import check_supplemental
+    from supplemental_data.sd_loop import sup_data_loop
+
+    config_logging(settings_supplemental)
+    check_supplemental(settings_supplemental)
+    sup_data_loop(settings_supplemental)
 
 def run_db_writer():
     '''
@@ -57,6 +70,8 @@ if __name__ == '__main__':
         PROCESSES.append(Process(target=run_aggregator,))
     if ARGS.db_writer:
         PROCESSES.append(Process(target=run_db_writer,))
+    if ARGS.supplemental:
+        PROCESSES.append(Process(target=run_supplemental,))
 
     try:
         for process in PROCESSES:

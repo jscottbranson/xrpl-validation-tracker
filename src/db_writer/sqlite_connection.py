@@ -31,7 +31,9 @@ def create_db_connection(db_location):
                                             )
 
                 connection.cursor().execute("""CREATE TABLE IF NOT EXISTS master_keys (
-                            master_key text PRIMARY KEY UNIQUE
+                            master_key text PRIMARY KEY UNIQUE,
+                            domain text,
+                            dUNL boolean
                             );"""
                                             )
 

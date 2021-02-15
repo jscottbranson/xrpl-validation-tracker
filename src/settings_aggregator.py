@@ -4,6 +4,7 @@ Variables
 #### ------------------- General Settings ------------------- ####
 LOG_FILE = "../aggregator.log" # Log file location
 ASYNCIO_DEBUG = False # Debug the asyncio loop
+UNIQUE_MESSAGE_KEY = 'signature' # Key in JSON WS response used to identify duplicate messages
 
 #### ------------------- WS Client Settings ------------------- ####
 WS_RETRY = 10 # Time in seconds to wait before trying to reconnect to a websocket server
@@ -21,5 +22,4 @@ URLS = [
 SERVER_IP = '127.0.0.1'
 SERVER_PORT = 8000
 
-UNIQUE_MESSAGE_KEY = 'signature' # Key in JSON WS response used to identify duplicate messages
 SENT_MESSAGES_MAX_LENGTH = 50000 # n outbound items to store to avoid sending duplicate outbound WS messages
