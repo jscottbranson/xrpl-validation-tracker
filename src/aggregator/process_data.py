@@ -33,7 +33,7 @@ async def process_data(queue_receive, queue_send, settings):
         try:
             if eval(unique_key) not in sent_message_tracking:
                 await queue_send.put(message)
-                sent_message_tracking.append(unique_key)
+                sent_message_tracking.append(eval(unique_key))
                 print(
                     "Incoming queue length:",
                     queue_size,
