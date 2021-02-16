@@ -15,6 +15,10 @@ async def process_data(queue_receive, queue_send, settings):
     # To-do: clean out queue_send, in case a client isn't connected
     queue_max = 0
     sent_message_tracking = []
+    unique_key = 'message'
+
+    for i in settings.UNIQUE_MESSAGE_KEY:
+        unique_key = unique_key + "['" + i + "']"
 
     # Listen for messages
     while True:
@@ -27,9 +31,9 @@ async def process_data(queue_receive, queue_send, settings):
             logging.info(f"New record high for the incoming message queue size: {queue_size}")
 
         try:
-            if message[settings.UNIQUE_MESSAGE_KEY] not in sent_message_tracking:
+            if eval(unique_key) not in sent_message_tracking:
                 await queue_send.put(message)
-                sent_message_tracking.append(message[settings.UNIQUE_MESSAGE_KEY])
+                sent_message_tracking.append(unique_key)
                 print(
                     "Incoming queue length:",
                     queue_size,

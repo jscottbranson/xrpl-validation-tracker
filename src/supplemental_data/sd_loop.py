@@ -8,6 +8,7 @@ import json
 import logging
 import socket
 
+import requests
 import websockets
 
 from supplemental_data.sqlite3_connection import create_db_connection
@@ -72,7 +73,11 @@ async def check_toml(domain):
     :param str domain: Domain to check
     '''
     url = "https://" + domain + "/.well-known/xrp-ledger.toml"
-    print(url)
+    try:
+        toml = requests.get(url)
+        print(toml)
+    except requests.exceptions.RequestException:
+        logging.warning(f"Unable to retrieve xrp-ledger.toml for: {url}.")
 
 async def get_domain(settings, key):
     '''
@@ -110,6 +115,7 @@ async def _workers(settings):
             logging.info(f"Retrieved: {len(db_master_keys)} master keys from the database.")
 
             # Check for dUNL validators
+            # Make the set into dictionaries for each validator
             for key in db_master_keys:
                 if key[0] in dunl_keys:
                     dunl = True
