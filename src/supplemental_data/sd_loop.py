@@ -7,14 +7,55 @@ import asyncio
 import json
 import logging
 import socket
+import sqlite3
 
 import requests
+import pytomlpp
 import websockets
 
 from supplemental_data.sqlite3_connection import create_db_connection
 from db_writer.sqlite_writer import sql_write
 from ws_client.ws_listen import create_ws_object
 from xrpl_unl_parser.parse_unl import unl_parser
+
+async def db_write_keys(keys_new, connection):
+    '''
+    Write the supplemental data into the database.
+
+    :param list keys_new: Data to be written
+    :param connection: SQLite3 connection
+    '''
+    sql_data = []
+    for i in keys_new:
+        sql_data.append(
+            (
+                i['key'],
+                i['domain'],
+                i['dunl'],
+                i['network'],
+                i['server_country'],
+                i['owner_country'],
+                i['toml_verified']
+            )
+        )
+    connection.executemany(
+        '''
+        INSERT OR REPLACE INTO master_keys (
+        master_key,
+        domain,
+        dunl,
+        network,
+        server_country,
+        owner_country,
+        toml_verified
+        ) VALUES (?, ?, ?, ?, ?, ?, ?);
+        ''',
+        sql_data
+    )
+
+    connection.commit()
+#    connection.close()
+    logging.info("Updated master_key table with supplemental data.")
 
 async def get_manifest(settings, key):
     '''
@@ -36,10 +77,11 @@ async def get_manifest(settings, key):
             try:
                 websocket_connection = await create_ws_object(url)
                 if websocket_connection:
-                    async with websocket_connection as ws:
-                        await ws.send(query)
-                        manifest = await ws.recv()
+                    async with websocket_connection as wsocket:
+                        await wsocket.send(query)
+                        manifest = await wsocket.recv()
                 manifest = json.loads(manifest)['result']
+                logging.info(f"Successfully retrieved the manifest for {key}.")
             except (
                     TimeoutError,
                     ConnectionResetError,
@@ -65,34 +107,49 @@ def get_master_keys(connection):
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM master_keys",)
     master_keys = cursor.fetchall()
-    logging.info("Retrieved the master keys from the database.")
     return master_keys
 
-async def check_toml(domain):
+async def check_toml(key):
     '''
-    :param str domain: Domain to check
+    :param dict key: Validation public key, domain, and other info
     '''
-    url = "https://" + domain + "/.well-known/xrp-ledger.toml"
+    url = "https://" + key['domain'] + "/.well-known/xrp-ledger.toml"
     try:
-        toml = requests.get(url)
-        print(toml)
-    except requests.exceptions.RequestException:
-        logging.warning(f"Unable to retrieve xrp-ledger.toml for: {url}.")
+        response = requests.get(url)
+        if response.status_code == 200:
+            response_content = response.content.decode()
+            try:
+                validators = pytomlpp.loads(response_content)['VALIDATORS']
+            except () as error:
+                logging.warning(f"Error: {error} parsing TOML file for domain: {key['domain']}. TOML contents: {response_content}.")
+            for i in validators:
+                try:
+                    if i['public_key'] == key['key']:
+                        logging.info(f"Successfully retrieved and parsed the TOML for: {key}.")
+                        key['toml_verified'] = True
+                        key['network'] = i['network'].lower()
+                        key['owner_country'] = i['owner_country'].lower()
+                        key['server_country'] = i['server_country'].lower()
+                except KeyError as error:
+                    continue
+    except requests.exceptions.RequestException as error:
+        logging.warning(f"Unable to retrieve xrp-ledger.toml for: {url}. Error {error}.")
+    return key
 
 async def get_domain(settings, key):
     '''
     Retrieve domains from a manifest and verify them via TOML.
 
     :param settings: Configuration file
-    :param set key: (key, domain, dunl)
+    :param dict key: key, domain, dunl
     '''
-    manifest = await get_manifest(settings, key[0])
-    domain = manifest['details']['domain']
+    manifest = await get_manifest(settings, key['key'])
+    domain = manifest['details']['domain'].lower()
 
     if domain:
-        # Check each domain for a TOML file
-        await check_toml(domain)
-        key = (key[0], domain, key[2])
+        key['domain'] = domain
+        logging.info(f"Preparing to retrieve the TOML for {key}.")
+        key = await check_toml(key)
     return key
 
 async def _workers(settings):
@@ -102,7 +159,7 @@ async def _workers(settings):
     :param settings: Configuration file
     '''
     connection = create_db_connection(settings.DATABASE_LOCATION)
-    logging.info("Database connection established to {settings.DATABASE_LOCATION}.")
+    logging.info(f"Database connection established to {settings.DATABASE_LOCATION}.")
     while True:
         try:
             keys_new = []
@@ -115,19 +172,32 @@ async def _workers(settings):
             logging.info(f"Retrieved: {len(db_master_keys)} master keys from the database.")
 
             # Check for dUNL validators
-            # Make the set into dictionaries for each validator
             for key in db_master_keys:
                 if key[0] in dunl_keys:
                     dunl = True
                 elif key[0] not in dunl_keys:
                     dunl = False
-                keys_new.append((key[0], key[1], dunl))
+                keys_new.append(
+                    {'key': key[0],
+                     'domain': key[1],
+                     'dunl': dunl,
+                     'network': '',
+                     'server_country': '',
+                     'owner_country': '',
+                     'toml_verified': False}
+                )
 
             # Get the domains
             domain_tasks = [get_domain(settings, key) for key in keys_new]
             keys_new = await asyncio.gather(*domain_tasks)
+
+            # Write the supplemental data into the DB
+            logging.info(f"Preparing to write supplemental data to the DB.")
+            await db_write_keys(keys_new, connection)
         except KeyboardInterrupt:
             break
+        except sqlite3.OperationalError as error:
+            logging.warning(f"SQLite3 error: {error}.")
 
 def sup_data_loop(settings):
     '''

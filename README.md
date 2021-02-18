@@ -13,7 +13,7 @@ After installing dependencies, adjust the settings in `settings_aggregator.py` a
 
 All modules depend on the python `websockets` module. `db_writer` also requires sqlite3.
 
-The `supplemental_data` depends on the `xrpl_unl_parser`.
+The `supplemental_data` depends on the `xrpl_unl_parser` and `pytomlpp`
 
 This has been tested on Python 3.7 and 3.8.
 
