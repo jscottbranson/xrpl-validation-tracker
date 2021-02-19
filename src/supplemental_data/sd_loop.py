@@ -144,10 +144,10 @@ async def get_domain(settings, key):
     :param dict key: key, domain, dunl
     '''
     manifest = await get_manifest(settings, key['key'])
-    domain = manifest['details']['domain'].lower()
+    domain = manifest['details']['domain']
 
     if domain:
-        key['domain'] = domain
+        key['domain'] = domain.lower()
         logging.info(f"Preparing to retrieve the TOML for {key}.")
         key = await check_toml(key)
     return key
