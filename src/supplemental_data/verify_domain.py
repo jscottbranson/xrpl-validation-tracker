@@ -66,6 +66,8 @@ class DomainVerification:
         self.db_connection.commit()
     #    connection.close()
         logging.info("Updated master_key table with supplemental data.")
+        self.db_connection.close()
+        logging.info("Database connection successfully closed.")
 
     async def get_manifest(self, key):
         '''
@@ -90,7 +92,7 @@ class DomainVerification:
                             await wsocket.send(query)
                             manifest = await wsocket.recv()
                     manifest = json.loads(manifest)['result']
-                    logging.info(f"Successfully retrieved the manifest for {key}.")
+                    #logging.info(f"Successfully retrieved the manifest for {key}.")
                 except (
                         TimeoutError,
                         ConnectionResetError,
@@ -103,7 +105,8 @@ class DomainVerification:
                     logging.warning(f"Error:( {error}) querying manifest for key {key} from server: {url}.")
                 query_attempt += 1
             elif manifest:
-                logging.info(f"Retrieved manifest for validator {key} using server: {url}.")
+                #logging.info(f"Retrieved manifest for validator {key} using server: {url}.")
+                pass
 
             return manifest
 
