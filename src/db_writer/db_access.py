@@ -21,6 +21,8 @@ async def process_db_data(queue, settings):
         try:
             if message['type'] == 'validationReceived' and 'master_key' in message:
                 db_validation_writer(message, database)
+            elif message['type'] == 'ledgerClosed':
+                print(f"{message}")
         except KeyError:
             # Ignore messages that don't contain 'type' key
             pass
@@ -30,4 +32,4 @@ async def process_db_data(queue, settings):
         queue_size = queue.qsize()
         if queue_size > queue_size_max:
             queue_size_max = queue_size
-            logging.info(f"New record high queue size: {queue_size_max}.")
+            logging.info(f"New record high for DB write queue size: {queue_size_max}.")

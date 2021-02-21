@@ -26,8 +26,10 @@ This has been tested on Python 3.7 and 3.8.
 6. Change logging to % format
 7. Daemonize
 8. Fix errors with multiprocessing when exiting using keyboard interrupt
-9. Fetch manifest, verify domain, and store domain in DB
-10. Retrieve and store UNL(s) & flag validator keys in the DB that belong to a specified UNL
+9. Support multiple UNLs
+10. Verify UNLs authenticity against a provided signature
+11. Check attestations in TOMLs
+12. Write ledgerClosed stream data to DB
 
 ## Thoughts
 1. Identify main chain through an aggregated ledger subscription stream - use this to verify hash, index, and time

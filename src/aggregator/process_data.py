@@ -30,21 +30,18 @@ async def process_data(queue_receive, queue_send, settings):
             queue_max = queue_size
             logging.info(f"New record high for the incoming message queue size: {queue_size}")
 
+        # Remove validated_ledgers field from ledger subscription messages, as
+        # that field is node specific and thus not aggregation-friendly
+        if message['type'] == 'ledgerClosed':
+            message['validated_ledgers'] = None
+
         try:
             if eval(unique_key) not in sent_message_tracking:
                 await queue_send.put(message)
                 sent_message_tracking.append(eval(unique_key))
-#                print(
-#                    "Incoming queue length:",
-#                    queue_size,
-#                    "Outgoing queue length:",
-#                    queue_send.qsize(),
-#                    "Sent message duplicate tracking list length:",
-#                    len(sent_message_tracking),
-#                )
         except KeyError:
             # Ignore unexpected response messages
-            pass
+            continue
         except KeyboardInterrupt:
             break
 

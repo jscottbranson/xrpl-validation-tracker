@@ -21,6 +21,7 @@ async def spawn_workers(settings):
     queue = asyncio.Queue(maxsize=0)
     queue_db = asyncio.Queue(maxsize=0)
     logging.info("Adding initial asyncio tasks to the loop.")
+    # Subscribe to websocket servers
     for url in settings.URLS:
         ws_servers.append(
             {
@@ -31,8 +32,7 @@ async def spawn_workers(settings):
                 'retry_count': 0,
             }
         )
-
-    # subscribe to a websocket server
+    # Reopen closed connections to the WS servers
     asyncio.create_task(
         ws_minder.mind_tasks(
             ws_servers,
