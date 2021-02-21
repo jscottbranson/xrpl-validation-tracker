@@ -13,7 +13,8 @@ async def process_data(queue_receive, queue_send, settings):
     :param asyncio.queues.Queue queue_send: Queue for outgoing websocket messages
     '''
     # To-do: clean out queue_send, in case a client isn't connected
-    queue_max = 0
+    queue_r_max = 0
+    queue_s_max = 0
     sent_message_tracking = []
     unique_key = 'message'
 
@@ -25,17 +26,22 @@ async def process_data(queue_receive, queue_send, settings):
         message = await queue_receive.get()
 
         # The below lines are just for debugging
-        queue_size = queue_receive.qsize()
-        if queue_size > queue_max:
-            queue_max = queue_size
-            logging.info(f"New record high for the incoming message queue size: {queue_size}")
+        queue_r_size = queue_receive.qsize()
+        if queue_r_size > queue_r_max:
+            queue_r_max = queue_r_size
+            logging.info(f"New record high for the incoming message queue size: {queue_r_size}")
+        queue_s_size = queue_send.qsize()
+        if queue_s_size > queue_s_max:
+            queue_s_max = queue_s_size
+            logging.info(f"New record high for the outgoing message queue size: {queue_s_size}")
 
         # Remove validated_ledgers field from ledger subscription messages, as
         # that field is node specific and thus not aggregation-friendly
-        if message['type'] == 'ledgerClosed':
-            message['validated_ledgers'] = None
+        if message['type'] == 'ledgerClosed' and 'validated_ledgers' in message:
+            del message['validated_ledgers']
 
         try:
+            # Add unique messages to the queue
             if eval(unique_key) not in sent_message_tracking:
                 await queue_send.put(message)
                 sent_message_tracking.append(eval(unique_key))

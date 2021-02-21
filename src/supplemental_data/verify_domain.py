@@ -178,11 +178,11 @@ class DomainVerification:
                 for i in validators:
                     try:
                         if i['public_key'] == key['key']:
-                            logging.info(f"Successfully retrieved and parsed the TOML for: {key}.")
                             key['toml_verified'] = True
                             key['network'] = i['network'].lower()
                             key['owner_country'] = i['owner_country'].lower()
                             key['server_country'] = i['server_country'].lower()
+                            logging.info(f"Successfully retrieved and parsed the TOML for: {key['domain']}.")
                         else:
                             # To-do: There could be a check to see if keys we don't know about are listed in the TOML.
                             # The manifest for those keys could be used to verify the domain.

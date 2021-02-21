@@ -3,6 +3,7 @@ This module interfaces with a SQL database by writing data extracted
 from websocket messages to the database.
 '''
 
+import logging
 import sqlite3
 
 RIPPLED_TIME_OFFSET = 946684800
@@ -79,26 +80,10 @@ def get_validator_key(key, column, table, connection):
 
     return key_id
 
-def ledger(message, connection):
-    '''
-    Append number of transactions to the ledger table.
-    :param message: a websocket message
-    :param connection: connection to the SQL database
-    '''
-
-    data = (
-        message['txn_count'],
-        message['ledger_hash'],
-    )
-
-    sql = ''' UPDATE ledgers SET tx_count = ? WHERE hash = ? '''
-
-    sql_write(sql, data, connection)
-
-
 def validations(message, connection):
     '''
     Parse validations subscription messages into SQL.
+
     :param message: a websocket validation stream subscription response message
     :param connection: connection to the SQL database
     '''
@@ -133,7 +118,7 @@ def validations(message, connection):
             str(not message['full']),
         )
 
-        sql = ''' INSERT INTO validation_stream(
+        sql = ''' INSERT INTO validation_stream (
                 id,
                 ledger_hash,
                 ephemeral_key,
@@ -144,3 +129,33 @@ def validations(message, connection):
                 VALUES(?,?,?,?,?,?)'''
 
         sql_write(sql, data, connection)
+
+def ledgers(message, connection):
+    '''
+    Write data on ledgers into the database.
+
+    To-do: Verify signing time is correct.
+
+    :param message: a websocket ledger stream subscription response message
+    :param connection: connection to the SQL database
+    '''
+    sql = '''UPDATE ledgers SET
+            txn_count = ?,
+            fee_base = ?,
+            fee_ref = ?,
+            reserve_base = ?,
+            reserve_inc = ?
+
+            WHERE hash = ?
+          '''
+    data = (
+        message['txn_count'],
+        message['fee_base'],
+        message['fee_ref'],
+        message['reserve_base'],
+        message['reserve_inc'],
+        message['ledger_hash']
+    )
+
+    sql_write(sql, data, connection)
+    print("SQL Writer:", message['ledger_index'])

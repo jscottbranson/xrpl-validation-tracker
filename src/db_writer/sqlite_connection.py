@@ -10,12 +10,13 @@ def create_db_connection(db_location):
     Connect to the SQL database.
 
     :param db_location: Location to store the database
+    :returns: Database connection
     '''
+    connection = None
     try:
         connection = sqlite3.connect(db_location)
         if connection is not None:
-            try:
-                connection.cursor().execute("""CREATE TABLE IF NOT EXISTS validation_stream (
+            connection.cursor().execute("""CREATE TABLE IF NOT EXISTS validation_stream (
                             id text PRIMARY KEY,
                             ledger_hash text NOT NULL,
                             ephemeral_key text NOT NULL,
@@ -23,35 +24,42 @@ def create_db_connection(db_location):
                             signing_time integer NOT NULL,
                             partial_validation text NOT NULL
                             );"""
-                                            )
+                                        )
 
-                connection.cursor().execute("""CREATE TABLE IF NOT EXISTS ephemeral_keys (
-                            ephemeral_key text PRIMARY KEY UNIQUE
+                # To-do: Add the ephemeral key sequence #  using data from manifests
+                # To-do: Link ephemeral keys to master keys
+            connection.cursor().execute("""CREATE TABLE IF NOT EXISTS ephemeral_keys (
+                            ephemeral_key text PRIMARY KEY UNIQUE,
+                            sequence integer,
+                            master_key integer
                             );"""
-                                            )
+                                        )
 
-                connection.cursor().execute("""CREATE TABLE IF NOT EXISTS master_keys (
+            connection.cursor().execute("""CREATE TABLE IF NOT EXISTS master_keys (
                             master_key text PRIMARY KEY UNIQUE,
                             domain text,
-                            dunl boolea,
+                            dunl boolean,
                             network text,
                             server_country text,
                             owner_country text,
                             toml_verified boolean
                             );"""
-                                            )
+                                        )
 
-                connection.cursor().execute("""CREATE TABLE IF NOT EXISTS ledgers(
-                            hash text PRIMARY KEY UNIQUE,
-                            sequence integer NOT NULL,
-                            signing_time integer
+            connection.cursor().execute("""CREATE TABLE IF NOT EXISTS ledgers(
+                        hash text PRIMARY KEY UNIQUE,
+                        sequence integer NOT NULL,
+                        signing_time integer,
+                            txn_count integer,
+                            fee_base integer,
+                            fee_ref integer,
+                            reserve_base integer,
+                            reserve_inc integer,
+                            chain text
                             );"""
-                                            )
+                                        )
 
-                return connection
-            except sqlite3.Error as message:
-                logging.critical(f"Error creating the database: {message}.")
-                return None
+        return connection
 
     except sqlite3.Error as message:
         logging.critical(f"Error creating the database: {message}.")
