@@ -17,6 +17,13 @@ The `supplemental_data` depends on the `xrpl_unl_parser` and `pytomlpp`
 
 This has been tested on Python 3.7 and 3.8.
 
+### Querying the database
+The database can be queried using standard sqlite3. For example:
+`sqlite3 validation_database.db 'SELECT * FROM master_keys WHERE toml_verified IS 1;' | cat >> keys_toml.txt`
+`sqlite3 validation_database.db 'SELECT * FROM master_keys WHERE domain IS NOT NULL;' | cat >> keys_domain.txt`
+
+Given that sqlite3 is not ideal for production, there is a need for additional scripts that interface with more robust databases.
+
 ## To Do Items
 1. Transition to Postgres or another production database
 2. Improve database structure & index the database
