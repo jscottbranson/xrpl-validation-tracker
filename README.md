@@ -18,11 +18,16 @@ The `supplemental_data` depends on the `xrpl_unl_parser` and `pytomlpp`
 This has been tested on Python 3.7 and 3.8.
 
 ### Querying the database
-The database can be queried using standard sqlite3. For example:  
-  
+The database can be queried using standard sqlite3.
+
+Query validators whose TOML files are verified:  
 `sqlite3 validation_database.db 'SELECT * FROM master_keys WHERE toml_verified IS 1;' | cat >> keys_toml.txt`  
   
+Query validators with verified domains:  
 `sqlite3 validation_database.db 'SELECT * FROM master_keys WHERE domain IS NOT NULL;' | cat >> keys_domain.txt`  
+  
+Query the transaction count in ledger(s) matching a given sequence:  
+`sqlite3 validation_database.db 'SELECT txn_count from ledgers WHERE sequence is 6180888;'`  
   
 Given that sqlite3 is not ideal for production, there is a need for additional scripts that interface with more robust databases.
 
