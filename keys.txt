@@ -105,7 +105,7 @@ nHBtfGpXK4NfQER5azX9PyJG9gj8W3xj7XJjuamJxSQ2bCLscXEZ|digitalvalidity.com|0|main|
 nHD3XNc7MHqrNt6zJVUGh5BG1U8Q7fZ2pG8FZ658iSEzFVv81Djx|xrp.cs.uoregon.edu|0||||0
 nHD9Km531wnD5YJ6YusStFwN4EDNuSH643vPCsKToNxK4zZ5XAiX||0||||0
 nHDsTMJc12Z2SyoHHd2VwVTYNxVcB7h5tPR992utzovRSoHL7peT||0||||0
-nHBTqw7vwjqrSMruoQNYmSXcrBmQHDquG7jgvrsQpurGaVELqdNx||0||||0
+nHBTqw7vwjqrSMruoQNYmSXcrBmQHDquG7jgvrsQpurGaVELqdNx|xrp.ninja|0|main|us|us|1
 nHBRixvVgQ62khJkw4tWMKwV5tJYP5u344hfD7UevkmymsfjRCqF||0||||0
 nHUP6rfQfgzg6tKga3k9ziEvtjwn1PB32gcr5dLcamqzmitszYv2||0||||0
 nHUnprXnkhBgaE6BHRrT8Lk1RAnUzNbePPsU1FGzfMkuxLNhqgaU||0||||0

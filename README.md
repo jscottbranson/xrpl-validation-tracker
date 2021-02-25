@@ -19,7 +19,9 @@ This has been tested on Python 3.7 and 3.8.
 
 ### Querying the database
 The database can be queried using standard sqlite3. For example:  
+  
 `sqlite3 validation_database.db 'SELECT * FROM master_keys WHERE toml_verified IS 1;' | cat >> keys_toml.txt`  
+  
 `sqlite3 validation_database.db 'SELECT * FROM master_keys WHERE domain IS NOT NULL;' | cat >> keys_domain.txt`  
   
 Given that sqlite3 is not ideal for production, there is a need for additional scripts that interface with more robust databases.
@@ -34,12 +36,14 @@ Given that sqlite3 is not ideal for production, there is a need for additional s
 7. Daemonize
 8. Fix errors with multiprocessing when exiting using keyboard interrupt
 9. Support multiple UNLs
-10. Verify UNLs authenticity against a provided signature (this has more to do w/ updating the [`xrpl_unl_parser` package].
+10. Verify UNLs authenticity against a provided signature (this has more to do w/ updating the [`xrpl_unl_parser` package].)
 11. Check attestations in TOMLs
 12. Write ledgerClosed stream data to DB
+13. Move this list to [Issues]
 
 ## Thoughts
 1. Identify main chain through an aggregated ledger subscription stream - use this to verify hash, index, and time
 2. Trie or rrdtool?
 
 [`xrpl_unl_parser` package]:https://github.com/crypticrabbit/xrpl_unl_parser
+[Issues]:https://github.com/crypticrabbit/xrpl-validation-tracker/issues
