@@ -23,7 +23,7 @@ docs/_buld/
 *.db.old
 *.db.bu
 *.sqlite3
-keys.txt
+
 
 # dUNL parsing tool
 xrpl_unl_parser/
