@@ -26,7 +26,7 @@ Given that sqlite3 is not ideal for production, there is a need for additional s
 
 ## To Do Items
 1. Transition to Postgres or another production database
-2. Improve database structure & index the database
+2. Improve database structure, consolidate queries, & index the database
 3. Improve the websocket server `ws_server` in the `aggregator` - accept headers, subscribe messages, etc.
 4. API access - mimic Data API v2 + live validation stream subscription (notify missing) - consider developing a `db_reader` package to retrieve requests.
 5. Multiple "To-do" items are noted in comments throughout the code.
@@ -34,10 +34,12 @@ Given that sqlite3 is not ideal for production, there is a need for additional s
 7. Daemonize
 8. Fix errors with multiprocessing when exiting using keyboard interrupt
 9. Support multiple UNLs
-10. Verify UNLs authenticity against a provided signature
+10. Verify UNLs authenticity against a provided signature (this has more to do w/ updating the [`xrpl_unl_parser` package].
 11. Check attestations in TOMLs
 12. Write ledgerClosed stream data to DB
 
 ## Thoughts
 1. Identify main chain through an aggregated ledger subscription stream - use this to verify hash, index, and time
 2. Trie or rrdtool?
+
+[`xrpl_unl_parser` package]:https://github.com/crypticrabbit/xrpl_unl_parser
