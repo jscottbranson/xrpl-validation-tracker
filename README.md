@@ -27,7 +27,7 @@ Query validators with verified domains:
 `sqlite3 validation_database.db 'SELECT * FROM master_keys WHERE domain IS NOT NULL;' | cat >> keys_domain.txt`  
   
 Query the transaction count in ledger(s) matching a given sequence:  
-`sqlite3 validation_database.db 'SELECT txn_count from ledgers WHERE sequence is 6180888;'`  
+`sqlite3 validation_database.db 'SELECT txn_count from ledgers WHERE sequence is 61809888;'`  
   
 Given that sqlite3 is not ideal for production, there is a need for additional scripts that interface with more robust databases.
 
