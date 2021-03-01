@@ -26,10 +26,11 @@ async def create_ws_object(url):
 async def websocket_subscribe(url, subscription_command, queue_receive):
     '''
     Connect to a websocket address using TLS settings specified in 'url'.
-    Keep the socket open, and add unique validation subscription response messages to
+    Keep the socket open, and add unique response messages from the remote server to
     the queue.
 
     :param dict url: URL and SSL certificate verification settings
+    :param json subscription_command: JSON object to send after opening the connection
     :param asyncio.queues.Queue queue_receive: Queue for incoming websocket messages
     '''
     logging.info(f"Attempting to connect to: {url['url']}")
@@ -40,7 +41,7 @@ async def websocket_subscribe(url, subscription_command, queue_receive):
     if websocket_connection:
         try:
             async with websocket_connection as ws:
-                # Subscribe to the validation stream
+                # Subscribe to the websocket stream
                 await ws.send(json.dumps(subscription_command))
                 logging.info(f"Subscribed to: {url['url']}")
                 while True:

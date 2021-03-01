@@ -16,6 +16,7 @@ venv.bak/
 docs/_buld/
 
 # Other Stuff
+*.txt
 *.sh
 *.log
 *.db
