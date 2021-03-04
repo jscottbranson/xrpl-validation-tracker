@@ -47,9 +47,9 @@ def create_db_connection(db_location):
                                         )
 
             connection.cursor().execute("""CREATE TABLE IF NOT EXISTS ledgers(
-                        hash text PRIMARY KEY UNIQUE,
-                        sequence integer NOT NULL,
-                        signing_time integer,
+                            hash text PRIMARY KEY UNIQUE,
+                            sequence integer NOT NULL,
+                            signing_time integer,
                             txn_count integer,
                             fee_base integer,
                             fee_ref integer,

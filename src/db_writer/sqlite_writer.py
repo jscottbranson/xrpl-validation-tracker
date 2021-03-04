@@ -158,4 +158,4 @@ def ledgers(message, connection):
     )
 
     sql_write(sql, data, connection)
-    print("SQL Writer:", message['ledger_index'])
+    print(f"Wrote ledger: {message['ledger_index']} with {message['txn_count']} transactions into the DB.")
