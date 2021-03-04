@@ -30,8 +30,8 @@ def create_db_connection(db_location):
                 # To-do: Link ephemeral keys to master keys
             connection.cursor().execute("""CREATE TABLE IF NOT EXISTS ephemeral_keys (
                             ephemeral_key text PRIMARY KEY UNIQUE,
-                            sequence integer,
-                            master_key integer
+                            master_key text,
+                            sequence integer
                             );"""
                                         )
 

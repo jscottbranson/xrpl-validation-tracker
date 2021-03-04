@@ -12,5 +12,5 @@ def create_db_connection(db_location):
         if connection:
             logging.info("Database connection successful.")
         return connection
-    except sqlite3.Error as message:
-        logging.critical(f"Error connecting to the SQLite3 database: {message}. Ensure the settings file contains a valid location.")
+    except sqlite3.Error as exception:
+        logging.critical(f"Error connecting to the SQLite3 database: {exception}. Ensure the settings file contains a valid location.")

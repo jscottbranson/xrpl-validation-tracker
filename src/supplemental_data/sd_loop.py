@@ -5,7 +5,7 @@ using keys stored in an exiting database.
 
 import asyncio
 import logging
-import supplemental_data.verify_domain as verify_domain
+import supplemental_data.get_data
 
 def sup_data_loop(settings):
     '''
@@ -22,7 +22,7 @@ def sup_data_loop(settings):
     while True:
         try:
             loop.run_until_complete(
-                verify_domain.DomainVerification().run_verification(settings)
+                supplemental_data.get_data.DomainVerification().run_verification(settings)
             )
             loop.run_forever()
         except KeyboardInterrupt:

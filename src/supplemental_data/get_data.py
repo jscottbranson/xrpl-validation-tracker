@@ -7,8 +7,9 @@ import json
 import logging
 import socket
 import sqlite3
+import time
 
-import requests
+import aiohttp
 import pytomlpp
 import websockets
 
@@ -28,26 +29,13 @@ class DomainVerification:
         self.dunl_keys = None
         self.settings = None
 
-    async def db_write_keys(self):
+    async def write_ma_keys(self, data):
         '''
-        Write the supplemental data into the database.
+        Write the supplemental data for the master keys into the database.
 
-        :param connection: SQLite3 connection
+        :param list data: Aggregated SQL data to write
         '''
-        logging.info(f"Preparing to write: {len(self.keys_new)} keys to the master_key DB.")
-        sql_data = []
-        for i in self.keys_new:
-            sql_data.append(
-                (
-                    i['key'],
-                    i['domain'],
-                    i['dunl'],
-                    i['network'],
-                    i['server_country'],
-                    i['owner_country'],
-                    i['toml_verified']
-                )
-            )
+        logging.info(f"Preparing to write: {len(data)} keys to the master_key DB.")
         self.db_connection.executemany(
             '''
             INSERT OR REPLACE INTO master_keys (
@@ -60,14 +48,62 @@ class DomainVerification:
             toml_verified
             ) VALUES (?, ?, ?, ?, ?, ?, ?);
             ''',
-            sql_data
+            data
         )
+        logging.info(f"Wrote: {len(data)} keys to the master_key DB.")
+
+    async def write_eph_keys(self, data):
+        '''
+        Write the supplemental data for ephemeral keys into the database.
+
+        :param list data: Aggregated SQL data to write
+        '''
+        logging.info(f"Preparing to write: {len(data)} keys to the ephemeral_key DB.")
+        self.db_connection.executemany(
+            '''
+            INSERT OR REPLACE INTO ephemeral_keys (
+            ephemeral_key,
+            master_key,
+            sequence
+            ) VALUES (?, ?, ?)
+            ''',
+            data
+        )
+        logging.info(f"Wrote: {len(data)} keys to the ephemeral_key DB.")
+
+    async def write_to_db(self):
+        '''
+        Write the supplemental data for the master keys into the database.
+        '''
+        data_m = []
+        data_e = []
+
+        for i in self.keys_new:
+            data_m.append(
+                (
+                    i['key'],
+                    i['domain'],
+                    i['dunl'],
+                    i['network'],
+                    i['server_country'],
+                    i['owner_country'],
+                    i['toml_verified']
+                )
+            )
+            data_e.append(
+                (
+                    i['ephemeral_key'],
+                    i['key'],
+                    i['sequence']
+                )
+            )
+
+        await self.write_ma_keys(data_m)
+        await self.write_eph_keys(data_e)
 
         self.db_connection.commit()
-    #    connection.close()
-        logging.info("Updated master_key table with supplemental data.")
         self.db_connection.close()
-        logging.info("Database connection successfully closed.")
+        logging.info("Database connection closed.")
 
     async def get_manifest(self, key):
         '''
@@ -115,7 +151,6 @@ class DomainVerification:
         Create the database connection.
         '''
         self.db_connection = create_db_connection(self.settings.DATABASE_LOCATION)
-        logging.info(f"Database connection established to {self.settings.DATABASE_LOCATION}")
 
     async def get_master_keys(self):
         '''
@@ -125,6 +160,7 @@ class DomainVerification:
         cursor = self.db_connection.cursor()
         cursor.execute("SELECT * FROM master_keys",)
         self.master_keys = cursor.fetchall()
+        self.db_connection.close()
         logging.info(f"Retrieved: {len(self.master_keys)} master keys from the database.")
 
     async def get_dunl_keys(self):
@@ -151,6 +187,8 @@ class DomainVerification:
             self.keys_new.append(
                 {
                     'key': key[0],
+                    'ephemeral_key': '',
+                    'sequence': int(),
                     'domain': key[1],
                     'dunl': dunl,
                     'network': '',
@@ -167,30 +205,39 @@ class DomainVerification:
         :param dict key: Validation public key, domain, and other info
         '''
         url = "https://" + key['domain'] + "/.well-known/xrp-ledger.toml"
+        validators = []
+        logging.info(f"Preparing to retrieve TOML for: {key['domain']}.")
         try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                response_content = response.content.decode()
-                try:
-                    validators = pytomlpp.loads(response_content)['VALIDATORS']
-                except () as error:
-                    logging.warning(f"Error: {error} parsing TOML file for domain: {key['domain']}. TOML contents: {response_content}.")
-                for i in validators:
-                    try:
-                        if i['public_key'] == key['key']:
-                            key['toml_verified'] = True
-                            key['network'] = i['network'].lower()
-                            key['owner_country'] = i['owner_country'].lower()
-                            key['server_country'] = i['server_country'].lower()
-                            logging.info(f"Successfully retrieved and parsed the TOML for: {key['domain']}.")
-                        else:
-                            # To-do: There could be a check to see if keys we don't know about are listed in the TOML.
-                            # The manifest for those keys could be used to verify the domain.
-                            logging.info(f"An additional validator key was detected while querying {key['domain']}.")
-                    except KeyError as error:
-                        continue
-        except requests.exceptions.RequestException as error:
-            logging.warning(f"Unable to retrieve xrp-ledger.toml for: {url}. Error {error}.")
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        response_content = await response.text()
+                        validators = pytomlpp.loads(response_content)['VALIDATORS']
+                        for i in validators:
+                            if i['public_key'] == key['key']:
+                                try:
+                                    key['toml_verified'] = True
+                                    key['network'] = i['network'].lower()
+                                    key['owner_country'] = i['owner_country'].lower()
+                                    key['server_country'] = i['server_country'].lower()
+                                    logging.info(f"Successfully retrieved and parsed the TOML for: {key['domain']}.")
+                                except (KeyError) as error:
+                                    logging.info(f"TOML file for: {key['domain']} was missing one or more keys: {error}.")
+                                    continue
+                            else:
+                                # To-do: Check to see if novel keys are listed in the TOML.
+                                # Then use the manifest verify their domains.
+                                logging.info(f"An additional validator key was detected while querying {key['domain']}.")
+        except (
+                pytomlpp._impl.DecodeError,
+                aiohttp.client_exceptions.ClientError,
+                aiohttp.client_exceptions.ClientResponseError,
+                aiohttp.client_exceptions.ClientConnectionError,
+                aiohttp.client_exceptions.ClientConnectorError,
+                aiohttp.client_exceptions.ClientConnectorCertificateError,
+        ) as error:
+            logging.info(f"Unable to retrieve xrp-ledger.toml for: {key['domain']}. Error {error}.")
+
         return key
 
     async def get_domain(self, key):
@@ -200,11 +247,13 @@ class DomainVerification:
         :param dict key: key, domain, dunl
         '''
         manifest = await self.get_manifest(key['key'])
-        domain = manifest['details']['domain']
+        manifest = manifest['details']
+        domain = manifest['domain']
+        key['ephemeral_key'] = manifest['ephemeral_key']
+        key['sequence'] = manifest['seq']
 
         if domain:
             key['domain'] = domain.lower()
-            logging.info(f"Preparing to retrieve the TOML for {key}.")
             key = await self.check_toml(key)
         return key
 
@@ -219,6 +268,7 @@ class DomainVerification:
             self.keys_new = []
             try:
                 logging.info(f"Sleeping for {self.settings.SLEEP_CYCLE} seconds.")
+                time_start = time.time()
                 await asyncio.sleep(self.settings.SLEEP_CYCLE)
                 logging.info("Preparing to get supplemental data.")
                 await self.get_db_connection()
@@ -229,7 +279,9 @@ class DomainVerification:
                 if self.keys_new:
                     domain_tasks = [self.get_domain(key) for key in self.keys_new]
                     self.keys_new = await asyncio.gather(*domain_tasks)
-                    await self.db_write_keys()
+                    await self.get_db_connection()
+                    await self.write_to_db()
+                    logging.info(f"Supplemental data cycle completed in {round(time.time() - time_start, 2)} seconds.")
             except (
                     KeyError,
                     AttributeError,

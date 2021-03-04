@@ -17,5 +17,5 @@ def sql_read(sql, data, connection):
         curson.execute(sql, data)
         connection.comit()
         return curson.lastrowid
-    except sqlite3Error as exception:
-        '''could
+    except sqlite3.Error as exception:
+        logging.warning(f"Could not execute SQLite3 command: {sql} with data: {data} due to an error: {exception}")

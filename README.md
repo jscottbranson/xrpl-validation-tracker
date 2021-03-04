@@ -13,7 +13,7 @@ After installing dependencies, adjust the settings in `settings_aggregator.py` a
 
 All modules depend on the python `websockets` module. `db_writer` also requires sqlite3.
 
-The `supplemental_data` depends on the `xrpl_unl_parser` and `pytomlpp`
+The `supplemental_data` depends on the `xrpl_unl_parser`, `pytomlpp`, and `aiohttp`.
 
 This has been tested on Python 3.7 and 3.8.
 
@@ -45,6 +45,7 @@ Given that sqlite3 is not ideal for production, there is a need for additional s
 11. Check attestations in TOMLs
 12. Write ledgerClosed stream data to DB
 13. Move this list to [Issues]
+14. It seems like the supplemental data module is getting blocked by requests for each TOML
 
 ## Thoughts
 1. Identify main chain through an aggregated ledger subscription stream - use this to verify hash, index, and time
