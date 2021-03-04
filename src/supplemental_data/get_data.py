@@ -62,10 +62,11 @@ class DomainVerification:
         self.db_connection.executemany(
             '''
             INSERT OR REPLACE INTO ephemeral_keys (
-            ephemeral_key,
-            master_key,
-            sequence
-            ) VALUES (?, ?, ?)
+                ephemeral_key,
+                master_key,
+                sequence
+            )
+            SELECT ?, rowid, ? FROM master_keys WHERE master_key=?
             ''',
             data
         )
@@ -93,8 +94,8 @@ class DomainVerification:
             data_e.append(
                 (
                     i['ephemeral_key'],
-                    i['key'],
-                    i['sequence']
+                    i['sequence'],
+                    i['key']
                 )
             )
 
@@ -160,8 +161,9 @@ class DomainVerification:
         cursor = self.db_connection.cursor()
         cursor.execute("SELECT * FROM master_keys",)
         self.master_keys = cursor.fetchall()
-        self.db_connection.close()
         logging.info(f"Retrieved: {len(self.master_keys)} master keys from the database.")
+        self.db_connection.close()
+        logging.info("Database connection closed.")
 
     async def get_dunl_keys(self):
         '''
@@ -236,7 +238,7 @@ class DomainVerification:
                 aiohttp.client_exceptions.ClientConnectorError,
                 aiohttp.client_exceptions.ClientConnectorCertificateError,
         ) as error:
-            logging.info(f"Unable to retrieve xrp-ledger.toml for: {key['domain']}. Error {error}.")
+            logging.info(f"Unable to retrieve xrp-ledger.toml for: {key['domain']}. Error: {error}.")
 
         return key
 

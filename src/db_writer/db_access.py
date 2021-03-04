@@ -20,13 +20,12 @@ async def process_db_data(queue, settings):
     while True:
         message = await queue.get()
         try:
-            database = sqlite3.connect(settings.DATABASE_LOCATION)
+            if not database:
+                database = sqlite3.connect(settings.DATABASE_LOCATION)
             if message['type'] == 'validationReceived' and 'master_key' in message:
                 db_validation_writer(message, database)
             elif message['type'] == 'ledgerClosed':
                 db_ledger_writer(message, database)
-            #Close the connection
-            database.close()
         except sqlite3.Error as error:
             logging.warning(f"Unable to connect to the database: {error}.")
         except KeyError:
