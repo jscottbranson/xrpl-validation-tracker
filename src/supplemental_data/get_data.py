@@ -16,7 +16,7 @@ import websockets
 from supplemental_data.sqlite3_connection import create_db_connection
 from db_writer.sqlite_writer import sql_write
 from ws_client.ws_listen import create_ws_object
-from xrpl_unl_parser.parse_unl import unl_parser
+import xrpl_unl_manager.utils as unl_utils
 
 class DomainVerification:
     '''
@@ -105,6 +105,28 @@ class DomainVerification:
         self.db_connection.close()
         logging.info("Database connection closed.")
 
+    async def http_request(self, url):
+        '''
+        Return the results from a http request.
+
+        :param str url: Address to connect to
+        '''
+        response = ''
+        try:
+            async with aiohttp.ClientSession() as session:
+                response = await session.get(url)
+                if response.status == 200:
+                    return await response.text()
+
+        except (
+                aiohttp.client_exceptions.ClientError,
+                aiohttp.client_exceptions.ClientResponseError,
+                aiohttp.client_exceptions.ClientConnectionError,
+                #aiohttp.client_exceptions.ClientConnectorError,
+                #aiohttp.client_exceptions.ClientConnectorCertificateError,
+        ) as error:
+            logging.info(f"Unable to complete HTTP request to URL: {url}. Error: {error}.")
+
     async def get_manifest(self, key):
         '''
         Query the manifest for a given key.
@@ -128,7 +150,7 @@ class DomainVerification:
                             await wsocket.send(query)
                             manifest = await wsocket.recv()
                     manifest = json.loads(manifest)['result']
-                    #logging.info(f"Successfully retrieved the manifest for {key}.")
+                    # logging.info(f"Successfully retrieved the manifest for {key}.")
                 except (
                         TimeoutError,
                         ConnectionResetError,
@@ -168,12 +190,13 @@ class DomainVerification:
         '''
         Retrieve the dUNL from a remote site.
         '''
+        self.dunl_keys = []
         logging.info(f"Preparing to retrieve the dUNL from {self.settings.DUNL_ADDRESS}.")
-        self.dunl_keys = json.loads(
-            unl_parser(
-                self.settings.DUNL_ADDRESS
-            )
-        )['public_validation_keys']
+        dunl = await self.http_request(self.settings.DUNL_ADDRESS)
+        #To-do: catch json.loads exceptions
+        dunl_keys = unl_utils.decodeValList(json.loads(dunl))
+        for i in dunl_keys:
+            self.dunl_keys.append(i.decode())
         logging.info(f"Retrieved the dUNL, which contains: {len(self.dunl_keys)} keys.")
 
     async def make_keys_list(self):
@@ -209,35 +232,25 @@ class DomainVerification:
         validators = []
         #logging.info(f"Preparing to retrieve TOML for: {key['domain']}.")
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    if response.status == 200:
-                        response_content = await response.text()
-                        validators = pytomlpp.loads(response_content)['VALIDATORS']
-                        for i in validators:
-                            if i['public_key'] == key['key']:
-                                try:
-                                    key['toml_verified'] = True
-                                    key['network'] = i['network'].lower()
-                                    key['owner_country'] = i['owner_country'].lower()
-                                    key['server_country'] = i['server_country'].lower()
-                                    #logging.info(f"Successfully retrieved and parsed the TOML for: {key['domain']}.")
-                                except (KeyError) as error:
-                                    logging.info(f"TOML file for: {key['domain']} was missing one or more keys: {error}.")
-                                    continue
-                            else:
-                                # To-do: Check to see if novel keys are listed in the TOML.
-                                # Then use the manifest verify their domains.
-                                logging.info(f"An additional validator key was detected while querying {key['domain']}.")
-        except (
-                pytomlpp._impl.DecodeError,
-                aiohttp.client_exceptions.ClientError,
-                aiohttp.client_exceptions.ClientResponseError,
-                aiohttp.client_exceptions.ClientConnectionError,
-                aiohttp.client_exceptions.ClientConnectorError,
-                aiohttp.client_exceptions.ClientConnectorCertificateError,
-        ) as error:
-            logging.info(f"Unable to retrieve xrp-ledger.toml for: {key['domain']}. Error: {error}.")
+            response_content = await self.http_request(url)
+            validators = pytomlpp.loads(str(response_content))['VALIDATORS']
+            for i in validators:
+                if i['public_key'] == key['key']:
+                    try:
+                        key['toml_verified'] = True
+                        key['network'] = i['network'].lower()
+                        key['owner_country'] = i['owner_country'].lower()
+                        key['server_country'] = i['server_country'].lower()
+                        #logging.info(f"Successfully retrieved and parsed the TOML for: {key['domain']}.")
+                    except (KeyError) as error:
+                        logging.info(f"TOML file for: {key['domain']} was missing one or more keys: {error}.")
+                        continue
+                else:
+                    # To-do: Check to see if novel keys are listed in the TOML.
+                    # Then use the manifest verify their domains.
+                    logging.info(f"An additional validator key was detected while querying {key['domain']}.")
+        except (pytomlpp._impl.DecodeError,) as error:
+            logging.info(f"Unable to decode the TOML for: {key['domain']}. Error: {error}.")
 
         return key
 

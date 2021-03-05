@@ -29,6 +29,8 @@ def create_db_connection(db_location):
             connection.cursor().execute("""CREATE TABLE IF NOT EXISTS ephemeral_keys (
                             ephemeral_key TEXT PRIMARY KEY UNIQUE,
                             master_key INT,
+                            manifest_sig_master TEXT,
+                            manifest_sig_eph TEXT,
                             sequence INT
                             );"""
                                         )

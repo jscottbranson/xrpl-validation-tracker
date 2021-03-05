@@ -13,7 +13,8 @@ After installing dependencies, adjust the settings in `settings_aggregator.py` a
 
 All modules depend on the python `websockets` module. `db_writer` also requires sqlite3.
 
-The `supplemental_data` depends on the `xrpl_unl_parser`, `pytomlpp`, and `aiohttp`.
+The `supplemental_data` module depends on the [`xrpl-unl-manager`], `pytomlpp`, and `aiohttp`.
+`xrpl_unl_parser` has its own dependencies, including `base58` and `cryptography`.
 
 This has been tested on Python 3.7 and 3.8.
 
@@ -44,16 +45,16 @@ Given that sqlite3 is not ideal for production, there is a need for additional s
 7. Daemonize
 8. Fix errors with multiprocessing when exiting using keyboard interrupt
 9. Support multiple UNLs
-10. Verify UNLs authenticity against a provided signature (this has more to do w/ updating the [`xrpl_unl_parser` package].)
-11. Check attestations in TOMLs
-12. Write ledgerClosed stream data to DB
+10. Check attestations in TOMLs
 13. Move this list to [Issues]
 14. Add ephemeral_key column to validation_stream DB
 15. Add 'first_seen' columns to master and ephemeral key DBs
+16. Parse the manifests retrieved by the supplemental data module & verify signatures
 
 ## Thoughts
 1. Identify main chain through an aggregated ledger subscription stream - use this to verify hash, index, and time
 2. Trie or rrdtool?
 
-[`xrpl_unl_parser` package]:https://github.com/crypticrabbit/xrpl_unl_parser
+[`xrpl_unl_parser`]:https://github.com/crypticrabbit/xrpl_unl_parser
+[`xrpl-unl-manager`]:https://github.com/antIggl/xrpl-unl-manager
 [Issues]:https://github.com/crypticrabbit/xrpl-validation-tracker/issues
