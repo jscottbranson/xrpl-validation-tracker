@@ -61,12 +61,11 @@ class DomainVerification:
         logging.info(f"Preparing to write: {len(data)} keys to the ephemeral_key DB.")
         self.db_connection.executemany(
             '''
-            INSERT OR REPLACE INTO ephemeral_keys (
-                ephemeral_key,
-                master_key,
-                sequence
-            )
-            SELECT ?, rowid, ? FROM master_keys WHERE master_key=?
+            UPDATE ephemeral_keys
+            SET
+                master_key = (SELECT rowid FROM master_keys WHERE master_key = ?),
+                sequence = ?
+            WHERE ephemeral_key = ?
             ''',
             data
         )
@@ -93,9 +92,9 @@ class DomainVerification:
             )
             data_e.append(
                 (
-                    i['ephemeral_key'],
+                    i['key'],
                     i['sequence'],
-                    i['key']
+                    i['ephemeral_key']
                 )
             )
 
