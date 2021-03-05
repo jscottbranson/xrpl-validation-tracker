@@ -70,9 +70,7 @@ def get_validator_key(key, column, table, connection):
     if key_id:
         key_id = key_id[0][0]
     elif not key_id:
-        sql = ''' INSERT INTO {}(
-                    {})
-                    VALUES(?) '''.format(table, column)
+        sql = ''' INSERT INTO {}({}) VALUES(?) '''.format(table, column)
 
         data = (key,)
 

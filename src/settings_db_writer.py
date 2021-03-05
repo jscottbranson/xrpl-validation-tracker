@@ -3,7 +3,7 @@ Variables
 '''
 #### ------------------ General Settings #### ------------------
 LOG_FILE = "../database_writer.log"
-DATABASE_LOCATION = "../validation_database.db"
+DATABASE_LOCATION = "../validations.sqlite3"
 ASYNCIO_DEBUG = False
 
 # The unique key is used to avoid processing duplicate messages. Specific JSON objects can be targeted by

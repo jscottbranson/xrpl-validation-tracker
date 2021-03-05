@@ -38,15 +38,15 @@ class DomainVerification:
         logging.info(f"Preparing to write: {len(data)} keys to the master_key DB.")
         self.db_connection.executemany(
             '''
-            INSERT OR REPLACE INTO master_keys (
-            master_key,
-            domain,
-            dunl,
-            network,
-            server_country,
-            owner_country,
-            toml_verified
-            ) VALUES (?, ?, ?, ?, ?, ?, ?);
+            UPDATE master_keys
+            SET
+                domain = ?,
+                dunl = ?,
+                network = ?,
+                server_country = ?,
+                owner_country = ?,
+                toml_verified = ?
+            WHERE master_key = ?
             ''',
             data
         )
@@ -82,13 +82,13 @@ class DomainVerification:
         for i in self.keys_new:
             data_m.append(
                 (
-                    i['key'],
                     i['domain'],
                     i['dunl'],
                     i['network'],
                     i['server_country'],
                     i['owner_country'],
-                    i['toml_verified']
+                    i['toml_verified'],
+                    i['key']
                 )
             )
             data_e.append(
@@ -182,9 +182,9 @@ class DomainVerification:
         Verify if a node is in the dUNL then make an initial list of keys.
         '''
         for key in self.master_keys:
-            if key[0] in self.dunl_keys:
+            if key[1] in self.dunl_keys:
                 dunl = True
-            elif key[0] not in self.dunl_keys:
+            elif key[1] not in self.dunl_keys:
                 dunl = False
             self.keys_new.append(
                 {
@@ -193,9 +193,9 @@ class DomainVerification:
                     'sequence': int(),
                     'domain': key[1],
                     'dunl': dunl,
-                    'network': '',
-                    'server_country': '',
-                    'owner_country': '',
+                    'network': key[3],
+                    'server_country': key[4],
+                    'owner_country': key[5],
                     'toml_verified': False
                 }
             )
@@ -208,7 +208,7 @@ class DomainVerification:
         '''
         url = "https://" + key['domain'] + "/.well-known/xrp-ledger.toml"
         validators = []
-        logging.info(f"Preparing to retrieve TOML for: {key['domain']}.")
+        #logging.info(f"Preparing to retrieve TOML for: {key['domain']}.")
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
@@ -222,7 +222,7 @@ class DomainVerification:
                                     key['network'] = i['network'].lower()
                                     key['owner_country'] = i['owner_country'].lower()
                                     key['server_country'] = i['server_country'].lower()
-                                    logging.info(f"Successfully retrieved and parsed the TOML for: {key['domain']}.")
+                                    #logging.info(f"Successfully retrieved and parsed the TOML for: {key['domain']}.")
                                 except (KeyError) as error:
                                     logging.info(f"TOML file for: {key['domain']} was missing one or more keys: {error}.")
                                     continue
@@ -298,4 +298,3 @@ class DomainVerification:
                 continue
             except KeyboardInterrupt:
                 break
-

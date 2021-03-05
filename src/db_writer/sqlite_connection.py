@@ -17,45 +17,43 @@ def create_db_connection(db_location):
         connection = sqlite3.connect(db_location)
         if connection is not None:
             connection.cursor().execute("""CREATE TABLE IF NOT EXISTS validation_stream (
-                            id text PRIMARY KEY,
-                            ledger_hash text NOT NULL,
-                            ephemeral_key text NOT NULL,
-                            master_key text NOT NULL,
-                            signing_time integer NOT NULL,
-                            partial_validation text NOT NULL
+                            id TEXT PRIMARY KEY UNIQUE,
+                            ledger_hash TEXT NOT NULL,
+                            ephemeral_key TEXT NOT NULL,
+                            master_key TEXT NOT NULL,
+                            signing_time INT NOT NULL,
+                            partial_validation BOOLEAN NOT NULL
                             );"""
                                         )
 
-                # To-do: Add the ephemeral key sequence #  using data from manifests
-                # To-do: Link ephemeral keys to master keys
             connection.cursor().execute("""CREATE TABLE IF NOT EXISTS ephemeral_keys (
-                            ephemeral_key text PRIMARY KEY UNIQUE,
-                            master_key text,
-                            sequence integer
+                            ephemeral_key TEXT PRIMARY KEY UNIQUE,
+                            master_key INT,
+                            sequence INT
                             );"""
                                         )
 
             connection.cursor().execute("""CREATE TABLE IF NOT EXISTS master_keys (
-                            master_key text PRIMARY KEY UNIQUE,
-                            domain text,
-                            dunl boolean,
-                            network text,
-                            server_country text,
-                            owner_country text,
-                            toml_verified boolean
+                            master_key TEXT PRIMARY KEY UNIQUE,
+                            domain TEXT,
+                            dunl BOOLEAN,
+                            network TEXT,
+                            server_country TEXT,
+                            owner_country TEXT,
+                            toml_verified BOOLEAN
                             );"""
                                         )
 
             connection.cursor().execute("""CREATE TABLE IF NOT EXISTS ledgers(
-                            hash text PRIMARY KEY UNIQUE,
-                            sequence integer NOT NULL,
-                            signing_time integer,
-                            txn_count integer,
-                            fee_base integer,
-                            fee_ref integer,
-                            reserve_base integer,
-                            reserve_inc integer,
-                            chain text
+                            hash TEXT PRIMARY KEY UNIQUE,
+                            sequence INT NOT NULL,
+                            signing_time INT,
+                            txn_count INT,
+                            fee_base INT,
+                            fee_ref INT,
+                            reserve_base INT,
+                            reserve_inc INT,
+                            chain TEXT
                             );"""
                                         )
 

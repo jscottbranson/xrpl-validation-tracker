@@ -3,7 +3,7 @@ Variables
 '''
 #### ------------------ General Settings #### ------------------
 LOG_FILE = "../supplemental_data.log"
-DATABASE_LOCATION = "../validation_database.db"
+DATABASE_LOCATION = "../validations.sqlite3"
 ASYNCIO_DEBUG = False
 
 SLEEP_CYCLE = 20 # Time (seconds) to sleep between runs
