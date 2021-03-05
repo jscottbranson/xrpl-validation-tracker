@@ -64,6 +64,8 @@ class DomainVerification:
             UPDATE ephemeral_keys
             SET
                 master_key = (SELECT rowid FROM master_keys WHERE master_key = ?),
+                manifest_sig_master = ?,
+                manifest_sig_eph = ?,
                 sequence = ?
             WHERE ephemeral_key = ?
             ''',
@@ -93,6 +95,8 @@ class DomainVerification:
             data_e.append(
                 (
                     i['key'],
+                    i['manifest_sig_master'],
+                    i['manifest_sig_eph'],
                     i['sequence'],
                     i['ephemeral_key']
                 )
@@ -149,7 +153,7 @@ class DomainVerification:
                         async with websocket_connection as wsocket:
                             await wsocket.send(query)
                             manifest = await wsocket.recv()
-                    manifest = json.loads(manifest)['result']
+                    manifest = json.loads(manifest)
                     # logging.info(f"Successfully retrieved the manifest for {key}.")
                 except (
                         TimeoutError,
@@ -218,7 +222,9 @@ class DomainVerification:
                     'network': key[3],
                     'server_country': key[4],
                     'owner_country': key[5],
-                    'toml_verified': False
+                    'toml_verified': False,
+                    'manifest_sig_master': '',
+                    'manifest_sig_eph': '',
                 }
             )
 
@@ -261,13 +267,17 @@ class DomainVerification:
         :param dict key: key, domain, dunl
         '''
         manifest = await self.get_manifest(key['key'])
-        manifest = manifest['details']
-        domain = manifest['domain']
+        manifest_blob = manifest['result']['manifest']
+        manifest = manifest['result']['details']
         key['ephemeral_key'] = manifest['ephemeral_key']
         key['sequence'] = manifest['seq']
+        ############################################################ Get signatures here
+        decoded_manifest = unl_utils.decodeManifest(manifest_blob)
+        key['manifest_sig_master'] = decoded_manifest['master_signature']
+        key['manifest_sig_eph'] = decoded_manifest['signature']
 
-        if domain:
-            key['domain'] = domain.lower()
+        if manifest['domain']:
+            key['domain'] = manifest['domain'].lower()
             key = await self.check_toml(key)
         return key
 
