@@ -8,6 +8,8 @@ ASYNCIO_DEBUG = False
 
 SLEEP_CYCLE = 20 # Time (seconds) to sleep between runs
 
+HTTP_TIMEOUT = 30 # Time (seconds) to wait for HTTP responses
+
 DUNL_ADDRESS = "https://vl.ripple.com" # Address where the dUNL is served
 
 #List of URLs to query for manifests

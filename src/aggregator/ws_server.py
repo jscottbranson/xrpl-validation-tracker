@@ -21,7 +21,7 @@ class WsServer:
 
         :param client: Client that has disconnected
         '''
-        logging.info(f"Client: {client.remote_address[0]} disconnected from WS server:.")
+        logging.info(f"Client: {client.remote_address[0]} disconnected from WS server.")
         self.clients.remove(client)
 
     async def outgoing_server(self, websocket, path):
@@ -31,26 +31,27 @@ class WsServer:
 
         :param websocket: Websocket client connection
         '''
-        try:
-            self.clients.add(websocket)
-            logging.info(f"A new user with IP: {websocket.remote_address[0]} connected to the WS server.")
-            while True:
+        self.clients.add(websocket)
+        logging.info(f"A new user with IP: {websocket.remote_address[0]} connected to the WS server.")
+        while True:
+            try:
                 outgoing_message = json.dumps(await self.queue_send.get())
-                # The following (if self.clients) if statement might not be necessary.
                 if self.clients:
                     for client in self.clients:
                         if client.open:
                             await client.send(outgoing_message)
-        except (
-                AttributeError,
-                websockets.exceptions.ConnectionClosedError,
-                ConnectionResetError,
-        ) as error:
-            logging.warning(f"Error with outgoing websocket server: {error}.")
-        except (websockets.exceptions.ConnectionClosedOK) as error:
-            logging.info(f"Websocket server connection closed: {error}")
-        finally:
-            await self.remove_client(websocket)
+            except (
+                    AttributeError,
+                    ConnectionResetError,
+                    websockets.exceptions.ConnectionClosedError,
+                    websockets.exceptions.ConnectionClosedOK,
+            ) as error:
+                logging.warning(f"Error with outgoing websocket server: {error}.")
+                try:
+                    await self.remove_client(websocket)
+                except KeyError:
+                    logging.warning(f"Error removing {client.remote_address[0]} from list of clients connected to the WS server.")
+                    continue
 
     async def start_outgoing_server(self, queue_send, settings):
         '''

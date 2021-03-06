@@ -63,25 +63,49 @@ class DomainVerification:
             '''
             UPDATE ephemeral_keys
             SET
-                master_key = (SELECT rowid FROM master_keys WHERE master_key = ?),
-                manifest_sig_master = ?,
-                manifest_sig_eph = ?,
-                sequence = ?
+                master_key = (SELECT rowid FROM master_keys WHERE master_key = ?)
             WHERE ephemeral_key = ?
             ''',
             data
         )
         logging.info(f"Wrote: {len(data)} keys to the ephemeral_key DB.")
 
+    async def write_manifests(self, data):
+        '''
+        Write manifests into the database.
+
+        :param list data: Aggregated SQL data to write
+        '''
+        logging.info(f"Preparing to write: {len(data)} manifests to the DB.")
+        self.db_connection.executemany(
+            '''
+            INSERT OR IGNORE INTO manifests (
+                manifest,
+                manifest_sig_master,
+                manifest_sig_eph,
+                sequence,
+                master_key,
+                ephemeral_key
+            )
+            VALUES (?, ?, ?, ?,
+                (SELECT rowid FROM master_keys WHERE master_key is ?),
+                (SELECT rowid FROM ephemeral_keys WHERE ephemeral_key is ?)
+            )
+            ''',
+            data
+        )
+        logging.info(f"Wrote: {len(data)} manifests to the DB.")
+
     async def write_to_db(self):
         '''
         Write the supplemental data for the master keys into the database.
         '''
-        data_m = []
-        data_e = []
+        data_master = []
+        data_ephemeral = []
+        data_manifest = []
 
         for i in self.keys_new:
-            data_m.append(
+            data_master.append(
                 (
                     i['domain'],
                     i['dunl'],
@@ -92,22 +116,37 @@ class DomainVerification:
                     i['key']
                 )
             )
-            data_e.append(
+            data_ephemeral.append(
                 (
                     i['key'],
-                    i['manifest_sig_master'],
-                    i['manifest_sig_eph'],
-                    i['sequence'],
                     i['ephemeral_key']
                 )
             )
 
-        await self.write_ma_keys(data_m)
-        await self.write_eph_keys(data_e)
+            data_manifest.append(
+                (
+                    i['manifest'],
+                    i['manifest_sig_master'],
+                    i['manifest_sig_eph'],
+                    i['sequence'],
+                    i['key'],
+                    i['ephemeral_key']
+                )
+            )
+
+        await self.write_ma_keys(data_master)
+        await self.write_eph_keys(data_ephemeral)
+        await self.write_manifests(data_manifest)
 
         self.db_connection.commit()
         self.db_connection.close()
         logging.info("Database connection closed.")
+
+    async def get_db_connection(self):
+        '''
+        Create the database connection.
+        '''
+        self.db_connection = create_db_connection(self.settings.DATABASE_LOCATION)
 
     async def http_request(self, url):
         '''
@@ -116,8 +155,13 @@ class DomainVerification:
         :param str url: Address to connect to
         '''
         response = ''
+        session_timeout = aiohttp.ClientTimeout(
+            total=None,
+            sock_connect=self.settings.HTTP_TIMEOUT,
+            sock_read=self.settings.HTTP_TIMEOUT
+        )
         try:
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(timeout=session_timeout) as session:
                 response = await session.get(url)
                 if response.status == 200:
                     return await response.text()
@@ -172,12 +216,6 @@ class DomainVerification:
 
             return manifest
 
-    async def get_db_connection(self):
-        '''
-        Create the database connection.
-        '''
-        self.db_connection = create_db_connection(self.settings.DATABASE_LOCATION)
-
     async def get_master_keys(self):
         '''
         Retrieve master keys from the database.
@@ -216,7 +254,6 @@ class DomainVerification:
                 {
                     'key': key[0],
                     'ephemeral_key': '',
-                    'sequence': int(),
                     'domain': key[1],
                     'dunl': dunl,
                     'network': key[3],
@@ -225,6 +262,8 @@ class DomainVerification:
                     'toml_verified': False,
                     'manifest_sig_master': '',
                     'manifest_sig_eph': '',
+                    'manifest': '',
+                    'sequence': int(),
                 }
             )
 
@@ -271,10 +310,10 @@ class DomainVerification:
         manifest = manifest['result']['details']
         key['ephemeral_key'] = manifest['ephemeral_key']
         key['sequence'] = manifest['seq']
-        ############################################################ Get signatures here
         decoded_manifest = unl_utils.decodeManifest(manifest_blob)
         key['manifest_sig_master'] = decoded_manifest['master_signature']
         key['manifest_sig_eph'] = decoded_manifest['signature']
+        key['manifest'] = manifest_blob
 
         if manifest['domain']:
             key['domain'] = manifest['domain'].lower()
