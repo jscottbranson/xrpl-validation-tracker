@@ -22,7 +22,10 @@ class WsServer:
         :param client: Client that has disconnected
         '''
         logging.info(f"Client: {client.remote_address[0]} disconnected from WS server.")
-        self.clients.remove(client)
+        try:
+            self.clients.remove(client)
+        except KeyError:
+            logging.warning(f"Error removing {client.remote_address[0]} from list of clients connected to the WS server.")
 
     async def outgoing_server(self, websocket, path):
         '''
@@ -44,14 +47,13 @@ class WsServer:
                     AttributeError,
                     ConnectionResetError,
                     websockets.exceptions.ConnectionClosedError,
-                    websockets.exceptions.ConnectionClosedOK,
             ) as error:
                 logging.warning(f"Error with outgoing websocket server: {error}.")
-                try:
-                    await self.remove_client(websocket)
-                except KeyError:
-                    logging.warning(f"Error removing {client.remote_address[0]} from list of clients connected to the WS server.")
-                    continue
+                await self.remove_client(websocket)
+
+            except (websockets.exceptions.ConnectionClosedOK,) as error:
+                logging.info(f"WS connection with client: {websocket.remote_address[0]} closed OK.")
+                await self.remove_client(websocket)
 
     async def start_outgoing_server(self, queue_send, settings):
         '''
