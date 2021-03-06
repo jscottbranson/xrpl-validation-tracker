@@ -4,7 +4,7 @@ Variables
 #### ------------------ General Settings #### ------------------
 LOG_FILE = "../database_writer.log"
 DATABASE_LOCATION = "../validations.sqlite3"
-ASYNCIO_DEBUG = False
+ASYNCIO_DEBUG = True
 
 # The unique key is used to avoid processing duplicate messages. Specific JSON objects can be targeted by
 # adding items to the UNIQUE_MESSAGE_KEY list. For example, ['results', 'item_a'] would target

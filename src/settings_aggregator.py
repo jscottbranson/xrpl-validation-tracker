@@ -3,7 +3,7 @@ Variables
 '''
 #### ------------------- General Settings ------------------- ####
 LOG_FILE = "../aggregator.log" # Log file location
-ASYNCIO_DEBUG = False # Debug the asyncio loop
+ASYNCIO_DEBUG = True # Debug the asyncio loop
 
 # The unique key is used to avoid processing duplicate messages. Specific JSON objects can be targeted by
 # adding items to the UNIQUE_MESSAGE_KEY list. For example, ['results', 'item_a'] would target

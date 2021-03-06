@@ -22,7 +22,7 @@ This has been tested on Python 3.7 and 3.8.
 The database can be queried using standard sqlite3.
 
 Query validators whose TOML files are verified:
-`sqlite3 validations.sqlite3 'SELECT * FROM master_keys WHERE toml_verified IS 1 ORDER BY domain ASC;' | cat >> keys_toml.txt`
+`sqlite3 validations.sqlite3 'SELECT * FROM master_keys WHERE toml_verified IS 1 ORDER BY domain ASC;'`
 
 Query validators with verified domains:
 `sqlite3 validations.sqlite3 'SELECT * FROM master_keys WHERE domain IS NOT NULL ORDER BY domain ASC;' | cat >> keys_domain.txt`
@@ -30,8 +30,8 @@ Query validators with verified domains:
 Query the transaction count in ledger(s) matching a given sequence:
 `sqlite3 validations.sqlite3 'SELECT txn_count from ledgers WHERE sequence is 61809888;'`
 
-Query for missing main net ledgers:
-`sqlite3 validations.sqlite3 'SELECT min(sequence) + 1 FROM (SELECT ledgers.*, lead(sequence) OVER (order by sequence) AS next_id FROM ledgers) ledgers WHERE next_id <> sequence + 1 AND txn_count IS NOT NULL;' | cat >> missing_ledgers.txt`
+Query the number of entries in the validation_stream table:
+`qlite3 validations.sqlite3 'select Count(*) FROM validation_stream;'`
 
 Given that sqlite3 is not ideal for production, there is a need for additional scripts that interface with more robust databases.
 
@@ -49,12 +49,13 @@ Given that sqlite3 is not ideal for production, there is a need for additional s
 13. Move this list to [Issues]
 14. Add ephemeral_key column to validation_stream DB
 15. Add 'first_seen' columns to master and ephemeral key DBs
-16. Parse the manifests retrieved by the supplemental data module & verify signatures
+16. Verify manifest signatures
+17. db_writer fails to reconnect if ws_server barfs after a client disconnects
+17. Write a setup.py script for `xrpl-unl-manager`?
 
 ## Thoughts
 1. Identify main chain through an aggregated ledger subscription stream - use this to verify hash, index, and time
 2. Trie or rrdtool?
 
-[`xrpl_unl_parser`]:https://github.com/crypticrabbit/xrpl_unl_parser
 [`xrpl-unl-manager`]:https://github.com/antIggl/xrpl-unl-manager
 [Issues]:https://github.com/crypticrabbit/xrpl-validation-tracker/issues

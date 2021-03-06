@@ -4,7 +4,7 @@ Variables
 #### ------------------ General Settings #### ------------------
 LOG_FILE = "../supplemental_data.log"
 DATABASE_LOCATION = "../validations.sqlite3"
-ASYNCIO_DEBUG = False
+ASYNCIO_DEBUG = True
 
 SLEEP_CYCLE = 20 # Time (seconds) to sleep between runs
 
