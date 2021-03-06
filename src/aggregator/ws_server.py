@@ -21,7 +21,7 @@ class WsServer:
 
         :param client: Client that has disconnected
         '''
-        logging.info(f"Client disconnected from WS server: {client}.")
+        logging.info(f"Client: {client.remote_address[0]} disconnected from WS server:.")
         self.clients.remove(client)
 
     async def outgoing_server(self, websocket, path):
@@ -47,10 +47,8 @@ class WsServer:
                 ConnectionResetError,
         ) as error:
             logging.warning(f"Error with outgoing websocket server: {error}.")
-            await self.remove_client(websocket)
         except (websockets.exceptions.ConnectionClosedOK) as error:
             logging.info(f"Websocket server connection closed: {error}")
-            await self.remove_client(websocket)
         finally:
             await self.remove_client(websocket)
 
