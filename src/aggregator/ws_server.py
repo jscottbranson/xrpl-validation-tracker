@@ -66,8 +66,8 @@ class WsServer:
                 websockets.exceptions.ConnectionClosedError,
         ) as error:
             logging.info(f"WS connection with client address: {ws_client.remote_address[0]} and connection object {ws_client} closed with: {error}.")
-        finally:
-            await self.remove_client([ws_client,])
+        #finally:
+        #    await self.remove_clients([ws_client,])
 
     async def start_outgoing_server(self, queue_send, settings):
         '''
