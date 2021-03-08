@@ -50,8 +50,8 @@ Given that sqlite3 is not ideal for production, there is a need for additional s
 14. Add ephemeral_key column to validation_stream DB
 15. Add 'first_seen' columns to master and ephemeral key DBs
 16. Verify manifest signatures
-17. db_writer fails to reconnect if ws_server barfs after a client disconnects
-17. Write a setup.py script for `xrpl-unl-manager`?
+17. Find & deal with blocking in ws_server, process_data, & others
+18. Write a setup.py script for `xrpl-unl-manager`?
 
 ## Thoughts
 1. Identify main chain through an aggregated ledger subscription stream - use this to verify hash, index, and time

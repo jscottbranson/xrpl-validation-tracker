@@ -331,9 +331,9 @@ class DomainVerification:
             self.keys_new = []
             try:
                 logging.info(f"Sleeping for {self.settings.SLEEP_CYCLE} seconds.")
-                time_start = time.time()
                 await asyncio.sleep(self.settings.SLEEP_CYCLE)
                 logging.info("Preparing to get supplemental data.")
+                time_start = time.time()
                 await self.get_db_connection()
                 await self.get_master_keys()
                 await self.get_dunl_keys()
