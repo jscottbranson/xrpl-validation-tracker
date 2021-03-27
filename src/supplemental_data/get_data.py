@@ -26,7 +26,7 @@ class DomainVerification:
         self.db_connection = None
         self.keys_new = []
         self.master_keys = None
-        self.dunl_keys = None
+        self.dunl_keys = set()
         self.settings = None
 
     async def write_ma_keys(self, data):
@@ -232,13 +232,13 @@ class DomainVerification:
         '''
         Retrieve the dUNL from a remote site.
         '''
-        self.dunl_keys = []
+        self.dunl_keys = set()
         logging.info(f"Preparing to retrieve the dUNL from {self.settings.DUNL_ADDRESS}.")
         dunl = await self.http_request(self.settings.DUNL_ADDRESS)
         #To-do: catch json.loads exceptions
         dunl_keys = unl_utils.decodeValList(json.loads(dunl))
         for i in dunl_keys:
-            self.dunl_keys.append(i.decode())
+            self.dunl_keys.add(i.decode())
         logging.info(f"Retrieved the dUNL, which contains: {len(self.dunl_keys)} keys.")
 
     async def make_keys_list(self):
@@ -246,9 +246,10 @@ class DomainVerification:
         Verify if a node is in the dUNL then make an initial list of keys.
         '''
         for key in self.master_keys:
-            if key[1] in self.dunl_keys:
+            print(key[0])
+            if key[0] in self.dunl_keys:
                 dunl = True
-            elif key[1] not in self.dunl_keys:
+            elif key[0] not in self.dunl_keys:
                 dunl = False
             self.keys_new.append(
                 {
