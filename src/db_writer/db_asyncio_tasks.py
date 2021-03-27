@@ -7,7 +7,7 @@ import logging
 from ws_client import ws_listen
 from ws_client import ws_minder
 from .db_access import process_db_data
-from aggregator.process_data import process_data
+from aggregator.process_data import DataProcessor
 
 async def spawn_workers(settings):
     '''
@@ -41,7 +41,7 @@ async def spawn_workers(settings):
         )
     )
     # check for duplicate messages
-    asyncio.create_task(process_data(queue, queue_db, settings))
+    asyncio.create_task(DataProcessor(queue, queue_db, settings).process_data())
     # write into the db
     asyncio.create_task(process_db_data(queue_db, settings))
 

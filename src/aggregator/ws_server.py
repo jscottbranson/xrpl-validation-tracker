@@ -30,19 +30,6 @@ class WsServer:
             logging.warning(f"Error removing disconnected WS client: {error}.")
         self.disconnected_clients = []
 
-    async def send_ws_response(self, outgoing_message):
-        '''
-        Iterate through the list of clients sending messages to each client.
-
-        :param outgoing_message: Message to send to all connected clients
-        '''
-
-        for client in self.clients:
-            if client.open:
-                await client.send(outgoing_message)
-            elif not client.open:
-                self.disconnected_clients.append(client)
-
     async def outgoing_server(self, ws_client, path):
         '''
         Listen for messages in the outgoing queue, then dispatch
@@ -50,14 +37,18 @@ class WsServer:
 
         :param ws_client: Websocket client connection
         '''
-        self.clients.add(ws_client)
-        logging.info(f"A new user with IP: {ws_client.remote_address[0]} connected to the WS server.")
-        logging.info(f"There are: {len(self.clients)} clients in the WS server connected clients list.")
         try:
+            self.clients.add(ws_client)
+            logging.info(f"A new user with IP: {ws_client.remote_address[0]} connected to the WS server.")
+            logging.info(f"There are: {len(self.clients)} clients connected to the WS server.")
             while True:
                 outgoing_message = json.dumps(await self.queue_send.get())
                 if self.clients:
-                    await self.send_ws_response(outgoing_message)
+                    for client in self.clients:
+                        if client.open:
+                            await client.send(outgoing_message)
+                        elif not client.open:
+                            self.disconnected_clients.append(client)
                 if self.disconnected_clients:
                         await self.remove_clients()
         except (
@@ -66,8 +57,8 @@ class WsServer:
                 websockets.exceptions.ConnectionClosedError,
         ) as error:
             logging.info(f"WS connection with client address: {ws_client.remote_address[0]} and connection object {ws_client} closed with: {error}.")
-        #finally:
-        #    await self.remove_clients([ws_client,])
+        finally:
+            self.disconnected_clients.append(ws_client)
 
     async def start_outgoing_server(self, queue_send, settings):
         '''

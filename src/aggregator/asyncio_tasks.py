@@ -6,7 +6,7 @@ import logging
 
 from ws_client import ws_listen
 from ws_client import ws_minder
-from .process_data import process_data
+from .process_data import DataProcessor
 from .ws_server import WsServer
 
 async def spawn_workers(settings):
@@ -34,7 +34,7 @@ async def spawn_workers(settings):
             }
         )
     asyncio.create_task(
-        process_data(queue_receive, queue_send, settings)
+        DataProcessor(queue_receive, queue_send, settings).process_data()
     )
     asyncio.create_task(
         WsServer().start_outgoing_server(queue_send, settings)

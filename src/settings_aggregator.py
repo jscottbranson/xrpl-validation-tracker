@@ -5,14 +5,9 @@ Variables
 LOG_FILE = "../aggregator.log" # Log file location
 ASYNCIO_DEBUG = False # Debug the asyncio loop
 
-# The unique key is used to avoid processing duplicate messages. Specific JSON objects can be targeted by
-# adding items to the UNIQUE_MESSAGE_KEY list. For example, ['results', 'item_a'] would target
-# json_response['results']['item_a']
-# Yes, I used `eval` to make this work. If anyone has a better solution let's see it
-#UNIQUE_MESSAGE_KEY = ['signature',]
-UNIQUE_MESSAGE_KEY = []
+# Storing too many SENT_MESSAGES can slow down the script and result in the outgoing server hanging
+SENT_MESSAGES_MAX_LENGTH = 20000 # n outbound items to store to avoid sending duplicate outbound WS messages
 
-SENT_MESSAGES_MAX_LENGTH = 50000 # n outbound items to store to avoid sending duplicate outbound WS messages
 #### ------------------- WS Client Settings ------------------- ####
 WS_RETRY = 10 # Time in seconds to wait before trying to reconnect to a websocket server
 MAX_CONNECT_ATTEMPTS = 500 # Max number of tries to attempt to call a remote websocket server
