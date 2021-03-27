@@ -246,7 +246,6 @@ class DomainVerification:
         Verify if a node is in the dUNL then make an initial list of keys.
         '''
         for key in self.master_keys:
-            print(key[0])
             if key[0] in self.dunl_keys:
                 dunl = True
             elif key[0] not in self.dunl_keys:
