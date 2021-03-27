@@ -39,9 +39,9 @@ class DataProcessor:
         :param dict message: Message from a remote websocket server
         :param str unique_key: Unique key used to avoid adding duplicate messages to the outbound queue.
         '''
-        if message not in self.sent_message_tracking:
+        if message[unique_key] not in set(self.sent_message_tracking):
             await self.queue_send.put(message)
-            self.sent_message_tracking.append(message)
+            self.sent_message_tracking.append(message[unique_key])
 
     async def send_outgoing_messages(self, message):
         '''
@@ -52,7 +52,7 @@ class DataProcessor:
         if message['type'] == 'validationReceived':
             await self.add_message_to_queue(message, 'signature')
         elif message['type'] == 'ledgerClosed':
-            await self.add_message_to_queue(message, 'ledgerHash')
+            await self.add_message_to_queue(message, 'ledger_hash')
         elif message['type'] == "response":
             pass
 
