@@ -6,9 +6,9 @@ LOG_FILE = "../supplemental_data.log"
 DATABASE_LOCATION = "../validations.sqlite3"
 ASYNCIO_DEBUG = False
 
-SLEEP_CYCLE = 20 # Time (seconds) to sleep between runs
+SLEEP_CYCLE = 600 # Time (seconds) to sleep between runs
 
-HTTP_TIMEOUT = 30 # Time (seconds) to wait for HTTP responses
+HTTP_TIMEOUT = 20 # Time (seconds) to wait for HTTP responses
 
 DUNL_ADDRESS = "https://vl.ripple.com" # Address where the dUNL is served
 
