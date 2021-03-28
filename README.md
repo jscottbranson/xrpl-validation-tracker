@@ -12,12 +12,14 @@ The `aggregator` code is structured to provide multiple layers of redundancy. Fo
 ## Installing & Requirements
 * All modules require `websockets`
 * `db_writer` and `supplemental_data` require sqlite3
-		* `supplemental_data` also requires `pytomlpp`, and `aiohttp`
+
+  * `supplemental_data` also requires `pytomlpp`, and `aiohttp`
 * `supplemental_data` requires [`xrpl-unl-manager`], which must be manually downloaded.
 * `pip install -r requirements.txt` automatically installs the required packages
-		* [`xrpl-unl-manager`] must be downloaded manually
-		* The requirements.txt is generated using `pip freeze` in Python 3.8
-		* It is possible older package versions will also work
+
+  * [`xrpl-unl-manager`] must be downloaded manually
+  * The requirements.txt is generated using `pip freeze` in Python 3.8
+  * It is possible older package versions will also work
 
 Development is tested on Python 3.8.
 
