@@ -9,16 +9,22 @@ The `aggregator` is designed for more flexible use with a wide range of streams.
 
 The `aggregator` code is structured to provide multiple layers of redundancy. For example, four servers could use the `aggregator` code to subscribe to 5-10 XRP Ledger nodes. Two additional servers could then use the `db_writer`, which already depends on the `aggregator`, to subscribe to the previously mentioned four servers. This schema provides redundancy at both the data aggregation and database ingestion stages.
 
-## Installing & Running the Software
+## Installing & Requirements
+* All modules require `websockets`
+* `db_writer` and `supplemental_data` require sqlite3
+		* `supplemental_data` also requires `pytomlpp`, and `aiohttp`
+* `supplemental_data` requires [`xrpl-unl-manager`], which must be manually downloaded.
+* `pip install -r requirements.txt` automatically installs the required packages
+		* [`xrpl-unl-manager`] must be downloaded manually
+		* The requirements.txt is generated using `pip freeze` in Python 3.8
+		* It is possible older package versions will also work
+
+Development is tested on Python 3.8.
+
+## Running the Software
 After installing dependencies, adjust the settings in `settings_aggregator.py`, `settings_db_writer.py`, and `settings_supplemental.py` then run `run_tracker.py` using the '-a', '-d', and/or 's' flags to specify which module(s) to run (there is not a flag to run `ws_client`, as it is a dependency for other modules).
 
 All three modules modules can be run on the same system and started simultaneously. Note that a Python bug with multiprocessing can inhibit clean shutdown via keyboard interrupt, and users are encouraged to check for orphaned processes if keyboard interrupt must be invoked multiple times.
-
-All modules depend on the python `websockets` module. `db_writer` and `supplemental_data` also require sqlite3.
-
-Further, `supplemental_data` also depends on [`xrpl-unl-manager`], `pytomlpp`, and `aiohttp`.
-
-This has been tested on Python 3.7 and 3.8.
 
 ### Querying the database
 The database can be queried using standard sqlite3.
