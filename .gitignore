@@ -28,6 +28,5 @@ docs/_buld/
 
 
 # dUNL parsing tool
-xrpl-unl-manager/
-xrpl_unl_manager/
-xrpl_unl_parser/
+/xrpl_validation_tracker/xrpl-unl-manager
+/xrpl_validation_tracker/xrpl_unl_manager

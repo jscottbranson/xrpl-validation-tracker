@@ -21,12 +21,18 @@ The `aggregator` code is structured to provide multiple layers of redundancy. Fo
   * The requirements.txt is generated using `pip freeze` in Python 3.8
   * It is possible older package versions will also work
 
+At this time, all dependencies can be installed inside a Python3 virtual environment using:
+`pip install -r requirements.txt && git clone https://github.com/antIggl/xrpl-unl-manager.git && mv xrpl-unl-manager ./xrpl_validation_tracker/xrpl_unl_manager`
+
 Development is tested on Python 3.8.
 
 ## Running the Software
-After installing dependencies, adjust the settings in `settings_aggregator.py`, `settings_db_writer.py`, and `settings_supplemental.py` then run `run_tracker.py` using the '-a', '-d', and/or 's' flags to specify which module(s) to run (there is not a flag to run `ws_client`, as it is a dependency for other modules).
+1. Install dependencies
+2. Navigate to the xrpl_validation_tracker directory
+3. Adjust the settings in `settings_aggregator.py`, `settings_db_writer.py`, and `settings_supplemental.py`
+4. Run `python3 run_tracker.py` using the '-a', '-d', and/or 's' flags to specify which module(s) to run (there is not a flag to run `ws_client`, as it is a dependency for other modules).
 
-All three modules modules can be run on the same system and started simultaneously. Note that a Python bug with multiprocessing can inhibit clean shutdown via keyboard interrupt, and users are encouraged to check for orphaned processes if keyboard interrupt must be invoked multiple times.
+All three modules modules can be run on the same system and started simultaneously. A Python multiprocessing bug can inhibit clean shutdown via keyboard interrupt, and users are encouraged to check for orphaned processes if keyboard interrupt must be invoked multiple times.
 
 ### Querying the database
 The database can be queried using standard sqlite3.
