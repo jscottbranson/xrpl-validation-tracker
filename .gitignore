@@ -17,7 +17,6 @@ docs/_buld/
 
 # Other Stuff
 *.toml
-*.txt
 *.sh
 *.log
 *.db
