@@ -24,6 +24,7 @@ docs/_buld/
 *.db.old
 *.db.bu
 *.sqlite3
+*.sqlite3-journal
 
 
 # dUNL parsing tool
