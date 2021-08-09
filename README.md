@@ -24,7 +24,7 @@ The `aggregator` code is structured to provide multiple layers of redundancy. Fo
 At this time, all dependencies can be installed inside a Python3 virtual environment using:
 `pip install -r requirements.txt && git clone https://github.com/antIggl/xrpl-unl-manager.git && mv xrpl-unl-manager ./xrpl_validation_tracker/xrpl_unl_manager`
 
-Development is tested on Python 3.8.
+Development is tested on Python 3.6, 3.7, & 3.8.
 
 ## Running the Software
 1. Install dependencies
