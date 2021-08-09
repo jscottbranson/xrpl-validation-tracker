@@ -49,6 +49,9 @@ Query the transaction count in ledger(s) matching a given sequence:
 Query the number of entries in the validation_stream table:
 `sqlite3 validations.sqlite3 'select Count(*) FROM validation_stream;'`
 
+Query the number of dUNL validators:
+`sqlite3 validations.sqlite3 'SELECT Count(*) FROM master_keys WHERE dunl IS 1;'`
+
 Given that sqlite3 is not ideal for production, there is a need for additional scripts that interface with more robust databases.
 
 ## To Do Items
