@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import socket
 import ssl
 
 import websockets
@@ -25,10 +26,11 @@ async def create_ws_object(url):
 async def websocket_subscribe(url, subscription_command, queue_receive):
     '''
     Connect to a websocket address using TLS settings specified in 'url'.
-    Keep the socket open, and add unique validation subscription response messages to
+    Keep the socket open, and add unique response messages from the remote server to
     the queue.
 
     :param dict url: URL and SSL certificate verification settings
+    :param json subscription_command: JSON object to send after opening the connection
     :param asyncio.queues.Queue queue_receive: Queue for incoming websocket messages
     '''
     logging.info(f"Attempting to connect to: {url['url']}")
@@ -39,7 +41,7 @@ async def websocket_subscribe(url, subscription_command, queue_receive):
     if websocket_connection:
         try:
             async with websocket_connection as ws:
-                # Subscribe to the validation stream
+                # Subscribe to the websocket stream
                 await ws.send(json.dumps(subscription_command))
                 logging.info(f"Subscribed to: {url['url']}")
                 while True:
@@ -48,18 +50,21 @@ async def websocket_subscribe(url, subscription_command, queue_receive):
                     try:
                         data = json.loads(data)
                         await queue_receive.put(data)
-                    except (
-                            json.JSONDecodeError,
-                    ) as error:
+                    except (json.JSONDecodeError,) as error:
                         logging.warning(f"{url['url']}. Unable to decode JSON: {data}. Error: {error}")
+                        break
+                    except KeyboardInterrupt:
                         break
         except (
                 TimeoutError,
                 ConnectionResetError,
                 ConnectionRefusedError,
+                ssl.SSLCertVerificationError,
+                websockets.exceptions.InvalidStatusCode,
                 websockets.exceptions.ConnectionClosedError,
                 websockets.exceptions.ConnectionClosedOK,
                 websockets.exceptions.InvalidMessage,
+                socket.gaierror,
         ) as error:
             logging.warning(f"An exception: ({error}) resulted in the websocket connection to: {url['url']} being closed.")
         except () as error:

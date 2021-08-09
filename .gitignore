@@ -1,6 +1,7 @@
 # Cache
 __pycache__/
 *.pyc
+*.py.swp
 
 # Virtual Environments
 env/
@@ -15,10 +16,17 @@ venv.bak/
 docs/_buld/
 
 # Other Stuff
+*.toml
 *.sh
 *.log
 *.db
+*.db-journal
 *.db.old
 *.db.bu
 *.sqlite3
-keys.txt
+*.sqlite3-journal
+
+
+# dUNL parsing tool
+/xrpl_validation_tracker/xrpl-unl-manager
+/xrpl_validation_tracker/xrpl_unl_manager

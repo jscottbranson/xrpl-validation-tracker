@@ -18,7 +18,7 @@ async def resubscribe_client(ws_servers, subscription_command, server, queue_rec
     ws_servers.append(
         {
             'task': asyncio.create_task(
-                websocket_subscribe(server['url'], subscription_command, queue_receive), name=str("WS_LISTEN: " + server['url']['url'])
+                websocket_subscribe(server['url'], subscription_command, queue_receive)
             ),
             'url': server['url'],
             'retry_count': server['retry_count'] + 1,
@@ -27,7 +27,7 @@ async def resubscribe_client(ws_servers, subscription_command, server, queue_rec
     ws_servers.remove(server)
     return ws_servers
 
-async def mind_tasks(ws_servers, subscription_command, queue_receive, settings):
+async def mind_tasks(ws_servers, queue_receive, settings):
     '''
     Check task loop & restart websocket clients if needed.
 
@@ -37,7 +37,15 @@ async def mind_tasks(ws_servers, subscription_command, queue_receive, settings):
     :param settings: File with necessary variables defined
     '''
     while True:
-        await asyncio.sleep(settings.WS_RETRY)
-        for server in ws_servers:
-            if server['task'].done() and server['retry_count'] <= settings.MAX_CONNECT_ATTEMPTS:
-                ws_servers = await resubscribe_client(ws_servers, subscription_command, server, queue_receive)
+        try:
+            await asyncio.sleep(settings.WS_RETRY)
+            for server in ws_servers:
+                if server['task'].done() and server['retry_count'] <= settings.MAX_CONNECT_ATTEMPTS:
+                    ws_servers = await resubscribe_client(
+                        ws_servers,
+                        settings.WS_SUBSCRIPTION_COMMAND,
+                        server,
+                        queue_receive
+                    )
+        except KeyboardInterrupt:
+            break
