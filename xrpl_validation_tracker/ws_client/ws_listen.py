@@ -59,7 +59,7 @@ async def websocket_subscribe(url, subscription_command, queue_receive):
                 TimeoutError,
                 ConnectionResetError,
                 ConnectionRefusedError,
-                ssl.SSLCertVerificationError,
+                ssl.CertificateError
                 websockets.exceptions.InvalidStatusCode,
                 websockets.exceptions.ConnectionClosedError,
                 websockets.exceptions.ConnectionClosedOK,
