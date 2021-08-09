@@ -17,7 +17,8 @@ async def resubscribe_client(ws_servers, subscription_command, server, queue_rec
     logging.warning(f"WS connection to {server['url']['url']} closed. Attempting to reconnect. Retry counter: {server['retry_count']}")
     ws_servers.append(
         {
-            'task': asyncio.create_task(
+            #'task': asyncio.create_task(
+            'task': asyncio.ensure_future(
                 websocket_subscribe(server['url'], subscription_command, queue_receive)
             ),
             'url': server['url'],

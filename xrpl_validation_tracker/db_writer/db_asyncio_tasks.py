@@ -25,7 +25,8 @@ async def spawn_workers(settings):
     for url in settings.URLS:
         ws_servers.append(
             {
-                'task': asyncio.create_task(
+                #'task': asyncio.create_task(
+                'task': asyncio.ensure_future(
                     ws_listen.websocket_subscribe(url, settings.WS_SUBSCRIPTION_COMMAND, queue)
                 ),
                 'url': url,
@@ -33,7 +34,8 @@ async def spawn_workers(settings):
             }
         )
     # Reopen closed connections to the WS servers
-    asyncio.create_task(
+    #asyncio.create_task(
+    asyncio.ensure_future(
         ws_minder.mind_tasks(
             ws_servers,
             queue,
@@ -41,9 +43,9 @@ async def spawn_workers(settings):
         )
     )
     # check for duplicate messages
-    asyncio.create_task(DataProcessor(queue, queue_db, settings).process_data())
+    asyncio.ensure_future(DataProcessor(queue, queue_db, settings).process_data())
     # write into the db
-    asyncio.create_task(process_db_data(queue_db, settings))
+    asyncio.ensure_future(process_db_data(queue_db, settings))
 
 def start_loop(settings):
     '''

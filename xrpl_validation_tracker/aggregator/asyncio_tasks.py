@@ -24,7 +24,8 @@ async def spawn_workers(settings):
     for url in settings.URLS:
         ws_servers.append(
             {
-                'task': asyncio.create_task(
+                #'task': asyncio.create_task(
+                'task': asyncio.ensure_future(
                     ws_listen.websocket_subscribe(
                         url, settings.WS_SUBSCRIPTION_COMMAND, queue_receive
                     )
@@ -33,13 +34,16 @@ async def spawn_workers(settings):
                 'retry_count': 0,
             }
         )
-    asyncio.create_task(
+    #asyncio.create_task(
+    asyncio.ensure_future(
         DataProcessor(queue_receive, queue_send, settings).process_data()
     )
-    asyncio.create_task(
+    #asyncio.create_task(
+    asyncio.ensure_future(
         WsServer().start_outgoing_server(queue_send, settings)
     )
-    asyncio.create_task(
+    #asyncio.create_task(
+    asyncio.ensure_future(
         ws_minder.mind_tasks(ws_servers, queue_receive, settings)
     )
     logging.info("Initial asyncio task list is running.")
