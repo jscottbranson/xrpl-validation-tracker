@@ -47,7 +47,7 @@ Query the transaction count in ledger(s) matching a given sequence:
 `sqlite3 validations.sqlite3 'SELECT txn_count from ledgers WHERE sequence is 61809888;'`
 
 Query the number of entries in the validation_stream table:
-`qlite3 validations.sqlite3 'select Count(*) FROM validation_stream;'`
+`sqlite3 validations.sqlite3 'select Count(*) FROM validation_stream;'`
 
 Given that sqlite3 is not ideal for production, there is a need for additional scripts that interface with more robust databases.
 
