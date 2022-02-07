@@ -71,6 +71,7 @@ Given that sqlite3 is not ideal for production, there is a need for additional s
 16. Verify manifest signatures
 17. Find & deal with blocking in ws_server, process_data, & others
 18. Write a setup.py script for [`xrpl-unl-manager`]?
+19. Track 'cookies' field in the validation stream to check if multiple validators have the same validation key
 
 ## Thoughts
 1. Identify main chain through an aggregated ledger subscription stream - use this to verify hash, index, and time

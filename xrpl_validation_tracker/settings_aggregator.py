@@ -18,7 +18,7 @@ WS_SUBSCRIPTION_COMMAND = {"command": "subscribe", "streams": ["validations", "l
 URLS = [
     {"url": "wss://xrplcluster.com:443", "ssl_verify": True},
     {"url": "wss://s1.ripple.com:443", "ssl_verify": True},
-    {"url": "wss://lco-xrpl-hub1.cabbit.tech:443", "ssl_verify": True},
+#    {"url": "wss://lco-xrpl-hub1.cabbit.tech:443", "ssl_verify": True},
 ]
 
 #### ------------------- WS Server Settings ------------------- ####
