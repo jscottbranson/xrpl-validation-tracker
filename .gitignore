@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 *.py.swp
+*.swp
 
 # Virtual Environments
 env/
