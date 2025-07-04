@@ -6,6 +6,7 @@ import logging
 import json
 import time
 import websockets
+from websockets.protocol import State
 
 class WsServer:
     '''
@@ -30,7 +31,7 @@ class WsServer:
             logging.warning(f"Error removing disconnected WS client: {error}.")
         self.disconnected_clients = []
 
-    async def outgoing_server(self, ws_client, path):
+    async def outgoing_server(self, ws_client):
         '''
         Listen for messages in the outgoing queue, then dispatch
         them to connected clients.
@@ -45,9 +46,9 @@ class WsServer:
                 outgoing_message = json.dumps(await self.queue_send.get())
                 if self.clients:
                     for client in self.clients:
-                        if client.open:
+                        if client.state == State.OPEN:
                             await client.send(outgoing_message)
-                        elif not client.open:
+                        elif client.state != State.OPEN:
                             self.disconnected_clients.append(client)
                 if self.disconnected_clients:
                         await self.remove_clients()
