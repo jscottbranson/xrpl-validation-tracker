@@ -11,14 +11,14 @@ SENT_MESSAGES_MAX_LENGTH = 20000 # n outbound items to store to avoid sending du
 
 #### ------------------- WS Client Settings ------------------- ####
 WS_RETRY = 20 # Time in seconds to wait before trying to reconnect to a websocket server
-MAX_CONNECT_ATTEMPTS = 5000 # Max number of tries to attempt to call a remote websocket server
+MAX_CONNECT_ATTEMPTS = 9000000 # Max number of tries to attempt to call a remote websocket server
 WS_SUBSCRIPTION_COMMAND = {"command": "subscribe", "streams": ["validations", "ledger",]} # Command to send to websocket server on open
 
 
 URLS = [
-    {"url": "wss://xrplcluster.com:443", "ssl_verify": True},
-    {"url": "wss://s1.ripple.com:443", "ssl_verify": True},
-#    {"url": "wss://lco-xrpl-hub1.cabbit.tech:443", "ssl_verify": True},
+        {"url": "wss://xahau.network", "ssl_verify": True},
+        #{"url": "wss://xrplcluster.com:443", "ssl_verify": True},
+        #{"url": "wss://s1.ripple.com:443", "ssl_verify": True},
 ]
 
 #### ------------------- WS Server Settings ------------------- ####
