@@ -1,9 +1,12 @@
 '''
 Variables
 '''
+import logging
+
 #### ------------------- General Settings ------------------- ####
 VERBOSE = False # True/False for console messages
 LOG_FILE = "../aggregator.log" # Log file location
+LOG_LEVEL = logging.WARNING
 ASYNCIO_DEBUG = False # Debug the asyncio loop
 
 # Storing too many SENT_MESSAGES can slow down the script and result in the outgoing server hanging

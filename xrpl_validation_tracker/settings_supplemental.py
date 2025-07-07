@@ -1,8 +1,11 @@
 '''
 Variables
 '''
+import logging
+
 #### ------------------ General Settings #### ------------------
 LOG_FILE = "../supplemental_data.log"
+LOG_LEVEL = logging.WARNING
 DATABASE_LOCATION = "../validations.sqlite3"
 ASYNCIO_DEBUG = False
 

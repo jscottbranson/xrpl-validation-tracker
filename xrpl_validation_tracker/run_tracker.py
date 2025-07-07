@@ -22,7 +22,7 @@ def config_logging(settings):
     # To-do: Configure log level in settings files.
     logging.basicConfig(
         filename=settings.LOG_FILE,
-        level=logging.INFO,
+        level=settings.LOG_LEVEL,
         datefmt="%Y-%m-%d %H:%M:%S",
         format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
     )
