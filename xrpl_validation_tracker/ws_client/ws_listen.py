@@ -65,6 +65,8 @@ async def websocket_subscribe(url, subscription_command, queue_receive):
                 websockets.exceptions.ConnectionClosedOK,
                 websockets.exceptions.InvalidMessage,
                 socket.gaierror,
+                asyncio.exceptions.CancelledError,
+                asyncio.exceptions.TimeoutError,
         ) as error:
             logging.warning(f"An exception: ({error}) resulted in the websocket connection to: {url['url']} being closed.")
         except () as error:
