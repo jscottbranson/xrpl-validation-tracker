@@ -56,6 +56,7 @@ async def websocket_subscribe(url, subscription_command, queue_receive):
                     except KeyboardInterrupt:
                         break
         except (
+                OSError,
                 TimeoutError,
                 ConnectionResetError,
                 ConnectionRefusedError,
@@ -67,7 +68,9 @@ async def websocket_subscribe(url, subscription_command, queue_receive):
                 socket.gaierror,
                 asyncio.exceptions.CancelledError,
                 asyncio.exceptions.TimeoutError,
+                KeyboardInterrupt,
+                SystemExit,
         ) as error:
             logging.warning(f"An exception: ({error}) resulted in the websocket connection to: {url['url']} being closed.")
-        except () as error:
-            logging.warning(f"Connection to {url['url']} refused with error: {error}.")
+        except Exception as error:
+            logging.warning(f"Connection to {url['url']} failed with error: {error}.")
